@@ -71,6 +71,14 @@ class MIRNet(keras.Model):
         return U
 
     def channel_attention(self, M: tf.Tensor)->tf.Tensor:
+        """
+            this method, is used to  exploits the inter-channel relationships of the convolutional feature
+            maps by applying squeeze and excitation operations
+            Params:
+                M(type: tf.Tensor): input feature maps.
+            Returns(type: tf.Tensor):
+                returns the calibrated feature map.
+        """
         # M = feature maps.
         n_channels =list(M.shape)[-1]
         gap = GlobalAveragePooling2D()
@@ -90,6 +98,14 @@ class MIRNet(keras.Model):
         return M * d_hat
     
     def spatial_attention(self, M: tf.Tensor)->tf.Tensor: 
+        """
+            this method, is used to  exploits the inter-spatial dependencies of the convolutional feature
+            maps by applying conv and sigmoid gating and maxpooling.
+            Params:
+                M(type: tf.Tensor): input feature maps.
+            Returns(type: tf.Tensor):
+                returns the calibrated feature map.
+        """
         # M = feature maps.
         gap = tf.reduce_max(M, axis=-1)
         gap = tf.expand_dims(gap, axis=-1)
@@ -108,6 +124,14 @@ class MIRNet(keras.Model):
         return M * f_hat
     
     def dual_attention_unit(self, X: tf.Tensor)->tf.Tensor:
+         """
+            this method, is used to extract the feature map of the input image, by 
+            using channel and spatial attention
+            Params:
+                M(type: tf.Tensor): input image.
+            Returns(type: tf.Tensor):
+                returns the calibrated feature map.
+        """
         n_channels = list(X.shape)[-1]
 
         # extract the feature maps (high-level features)
@@ -125,6 +149,15 @@ class MIRNet(keras.Model):
         return Add()([X, conv_out])
     
     def downsampling(self, X: tf.Tensor)->tf.Tensor: 
+        """
+            this method, used for downsampling the feature maps using residual blocks(main
+            and skip branch), uses the antialiasing downsampling.
+            Params:
+                Params:
+                M(type: tf.Tensor): input image.
+            Returns(type: tf.Tensor):
+                returns the downsampled X.
+        """
         n_channels = list(X.shape)[-1]
 
         #upper branch (main branch)
@@ -144,6 +177,15 @@ class MIRNet(keras.Model):
         return Add()([skip_branch, upper_branch])
     
     def upsampling(self, X: tf.Tensor)->tf.Tensor: 
+        """
+            this method, used for upsampling the feature maps or image using 
+            residual blocks(main and skip branch), uses the BiLinear upsampling.
+            Params:
+                Params:
+                X(type: tf.Tensor): input image.
+            Returns(type: tf.Tensor):
+                returns the upsampled X.
+        """
         n_channels = list(X.shape)[-1]
 
         # upprt barch upsampling with bilinear upsampler.
