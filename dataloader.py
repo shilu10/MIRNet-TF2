@@ -17,8 +17,8 @@ class DataLoader:
         
     def __lr_image_path(self):
         try:
-            train_lr_data_path = os.path.join("lol_dataset", "our485", "low") 
-            val_lr_data_path = os.path.join("lol_dataset", "eval15", 'low')
+            train_lr_data_path = os.path.join("lol_dataset", "our485", "low", "*.png") 
+            val_lr_data_path = os.path.join("lol_dataset", "eval15", 'low', "*.png")
             return train_lr_data_path, val_lr_data_path
         
         except Exception as err:
@@ -26,8 +26,8 @@ class DataLoader:
         
     def __hr_image_path(self):
         try: 
-            train_hr_data_path = os.path.join("lol_dataset", "our485", "high") 
-            val_hr_data_path = os.path.join("lol_dataset", "eval15", 'high') 
+            train_hr_data_path = os.path.join("lol_dataset", "our485", "high", "*.png") 
+            val_hr_data_path = os.path.join("lol_dataset", "eval15", 'high', "*.png") 
             return train_hr_data_path, val_hr_data_path
         
         except Exception as err:
@@ -36,8 +36,8 @@ class DataLoader:
     def __lr_image_files(self):
         try:
             train_lr_data_path, val_lr_data_path = self.__lr_image_path()
-            files = list(paths.list_images(train_lr_data_path))
-            files_val = list(paths.list_images(val_lr_data_path))
+            files = sorted(glob.glob(train_lr_data_path))
+            files_val = sorted(glob.glob(val_lr_data_path))
             return files, files_val
         
         except Exception as err:
@@ -46,8 +46,8 @@ class DataLoader:
     def __hr_image_files(self):
         try:
             train_hr_data_path, val_hr_data_path = self.__hr_image_path() 
-            files = list(paths.list_images(train_hr_data_path))
-            files_val = list(paths.list_images(val_hr_data_path))
+            files = sorted(glob.glob(train_hr_data_path))
+            files_val = sorted(glob.glob(val_hr_data_path))
             return files, files_val
         
         except Exception as err:
@@ -56,7 +56,8 @@ class DataLoader:
     def __train_tf_dataset(self):
         try: 
             lr_train_files, _ = self.__lr_image_files()
-            hr_train_files, _ = self.__lr_image_files()
+            hr_train_files, _ = self.__hr_image_files()
+            print(lr_train_files[:4])
             tf_dataset = tf.data.Dataset.from_tensor_slices((lr_train_files, hr_train_files)) 
             return tf_dataset
         
@@ -66,7 +67,7 @@ class DataLoader:
     def __val_tf_dataset(self):
         try: 
             _, lr_val_files = self.__lr_image_files()
-            _, hr_val_files = self.__lr_image_files()
+            _, hr_val_files = self.__hr_image_files()
             tf_dataset = tf.data.Dataset.from_tensor_slices((lr_val_files, hr_val_files)) 
             return tf_dataset 
         
@@ -87,21 +88,17 @@ class DataLoader:
         except Exception as err:
             return err 
         
-        else:
-            self.train_data_path = os.path.join("lol_dataset", "our485", "low")
-            self.val_data_path = os.path.join("lol_dataset", "eval15", 'low')
-        
     def __read_img(self, img_fpath): 
         try: 
             raw = tf.io.read_file(img_fpath)
-            image = tf.image.decode_png(raw)
-            image = tf.cast(image, dtype=tf.float32) / 255.0
+            image = tf.image.decode_png(raw, channels=3)
+            image = tf.image.convert_image_dtype(image, dtype=tf.float32)
             return image
             
         except Exception as err:
             return err
         
-    def __load_data(self, lr_img_path, hr_img_path, transform):
+    def __load_data(self, lr_img_path, hr_img_path):
         try: 
             lr_img = self.__read_img(lr_img_path)
             hr_img = self.__read_img(hr_img_path)
@@ -111,33 +108,34 @@ class DataLoader:
         except Exception as err:
             return err
         
+    def __create_tf_dataset(self, tf_ds, batch_size, transform):
+        if transform:
+            print("ing")
+           
+            tf_ds = tf_ds.map(lambda lr, hr: random_crop(lr, hr), num_parallel_calls=tf.data.AUTOTUNE)
+            tf_ds = tf_ds.map(random_flip, num_parallel_calls=tf.data.AUTOTUNE)
+            tf_ds = tf_ds.map(random_rotate, num_parallel_calls=tf.data.AUTOTUNE)
+      #  tf_ds = tf_ds.shuffle(buffer_size=50)
+        tf_ds = tf_ds.batch(batch_size, drop_remainder=True)
+        tf_ds = tf_ds.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
+        
+        return tf_ds
+        
     def get_dataset(self, subset, batch_size, transform=True):
         assert subset in ("train", 'val'), "unsupported split type"
         try:
             if subset == "train":
                 tf_ds = self.__train_tf_dataset()
                 tf_ds = tf_ds.map(self.__load_data, num_parallel_calls=tf.data.AUTOTUNE).cache()
-                if transform:
-                    tf_ds = tf_ds.map(random_crop, num_parallel_calls=tf.data.AUTOTUNE).cache()
-                    tf_ds = tf_ds.map(random_flip, num_parallel_calls=tf.data.AUTOTUNE).cache()
-                    tf_ds = tf_ds.map(random_rotate, num_parallel_calls=tf.data.AUTOTUNE).cache()
-                tf_ds = tf_ds.shuffle(buffer_size=50)
-                tf_ds = tf_ds.batch(batch_size)
-                tf_ds = tf_ds.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
+                tf_ds = self.__create_tf_dataset(tf_ds, batch_size, transform)
                 return tf_ds
             
             else:
                 tf_ds = self.__val_tf_dataset()
                 tf_ds = tf_ds.map(self.__load_data, num_parallel_calls=tf.data.AUTOTUNE).cache()
-                if transform:
-                    tf_ds = tf_ds.map(random_crop, num_parallel_calls=tf.data.AUTOTUNE).cache()
-                    tf_ds = tf_ds.map(random_flip, num_parallel_calls=tf.data.AUTOTUNE).cache()
-                    tf_ds = tf_ds.map(random_rotate, num_parallel_calls=tf.data.AUTOTUNE).cache()
-                    
-                tf_ds = tf_ds.shuffle(buffer_size=5)
-                tf_ds = tf_ds.batch(batch_size)
-                tf_ds = tf_ds.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
+                tf_ds = self.__create_tf_dataset(tf_ds, batch_size, transform)
                 return tf_ds
                 
         except Exception as err:
+            print(err)
             raise InitializationErro('DataLoader, has not been initialize, use .initalize method')
