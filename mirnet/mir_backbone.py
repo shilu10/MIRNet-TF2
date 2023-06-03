@@ -24,6 +24,17 @@ class MIRNet(keras.Model):
         self.channels = num_channels
         
     def selective_kernel_feature_fusion(self, L1, L2, L3):
+        """
+            this method is used for adjusting the receptive field of the neurons
+            dynamically using two methods fuse and select, instead of just concatinating.
+            Params:
+                L1(dtype: tf.Tensor): convolutional stream1.
+                L2(dtype: tf.Tensor): convolutional stream2.
+                L3(dtype: tf.Tensor): convolutional stream3.
+                
+            Return(type: tf.Tensor): 
+                returns a recalibrated convolutional sreams.
+        """
         n_channels = list(L1.shape)[-1]
         gap = GlobalAveragePooling2D()
         channel_downscaling_conv = Conv2D(filters=n_channels//8, kernel_size=(1,1))
