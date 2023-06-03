@@ -8,7 +8,7 @@ class InitializationErro(Exception):
         self.message = message
         
 
-class DataLoader:
+class LOLDataLoader:
     def __init__(self, dname):
         assert dname in ["lol"], "given dataset name is not valid, supported datasets are ['lol']"  
         #assert type(resize_shape) == int, 'Unknown dtype for resize shape, needed Int' 
