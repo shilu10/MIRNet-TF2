@@ -26,3 +26,21 @@ def random_rotate(lr_img, hr_img):
     rn = tf.random.uniform(shape=(), maxval=4, dtype=tf.int32)
     return tf.image.rot90(lr_img, rn), tf.image.rot90(hr_img, rn)
 
+
+class CharBonnierLoss(keras.losses.Loss):
+    def __init__(self):
+        super(CharBonnierLoss, self).__init__()
+
+    def __call__(self, true_y, pred_y):
+        loss_val = tf.reduce_mean(tf.sqrt(tf.square(true_y - pred_y) + tf.square(1e-3)))
+        return loss_val
+
+
+class PSNR(keras.metrics.Metric):
+    def __init__(self):
+        super(PSNR, self).__init__()
+
+    def call(self, true_y, pred_y):
+        psnr_score =  tf.image.psnr(pred_y, true_y, max_val=255.0)
+        return psnr_score
+
