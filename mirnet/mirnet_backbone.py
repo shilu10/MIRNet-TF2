@@ -1,0 +1,189 @@
+class MIRNet(keras.Model):
+    def __init__(self, num_rrg, num_mrb, num_channels):
+        super(MIRNet, self).__init__()
+        self.num_rrg = num_rrg 
+        self.num_mrb = num_mrb 
+        self.channels = num_channels
+        
+    def selective_kernel_feature_fusion(self, L1, L2, L3):
+        n_channels = list(L1.shape)[-1]
+        gap = GlobalAveragePooling2D()
+        channel_downscaling_conv = Conv2D(filters=n_channels//8, kernel_size=(1,1))
+        channel_upsampling_conv1 = Conv2D(filters=n_channels, kernel_size=(1, 1))
+        channel_upsampling_conv2 = Conv2D(filters=n_channels, kernel_size=(1, 1))
+        channel_upsampling_conv3 = Conv2D(filters=n_channels, kernel_size=(1, 1))
+
+        # combining all three scale streams
+        L = L1 + L2 + L3 
+        # calculate the  channel-wise statistics
+        s = gap(L)
+        s =  tf.reshape(s, shape=(-1, 1, 1, n_channels))
+
+        # applying channel upsampling to the z(feature vector) to get feature descriptor
+        # v = feature descriptor, z = feature vector
+        z =  channel_downscaling_conv(s)
+        v1 = channel_upsampling_conv1(z)
+        v2 = channel_upsampling_conv2(z)
+        v3 = channel_upsampling_conv3(z)
+
+        # applying the softmax to v1, v2, v3, to get a attention activation.
+        # s = attention activation for a feature descriptor.
+        s1 = Softmax()(v1)
+        s2 = Softmax()(v2)
+        s3 = Softmax()(v3)
+
+        # adaptively recabirating the feature maps.
+        L1 = s1 * L1 
+        L2 = s3 * L2 
+        L3 = s3 * L3 
+
+        # Global descriptor.
+        U = Add()([L1, L2, L3])
+        return U
+
+    def channel_attention(self, M: tf.Tensor)->tf.Tensor:
+        # M = feature maps.
+        n_channels =list(M.shape)[-1]
+        gap = GlobalAveragePooling2D()
+
+        # squeeze operation, to extract the feature descriptor, by encoding global context
+        d = gap(M)
+        d = tf.reshape(d, shape=(-1,1,1,n_channels))
+
+        # excitation operation 
+        conv_1 = Conv2D(filters=n_channels//8, kernel_size=(1, 1), activation="relu")(d)
+        conv_2 = Conv2D(filters=n_channels, kernel_size=(1, 1))(conv_1)
+
+        # sgimoid gating, to extract the d_hat(activation)
+        d_hat = sigmoid(conv_2)
+
+        # rescaling the feature map with activation d_hat
+        return M * d_hat
+    
+    def spatial_attention(self, M: tf.Tensor)->tf.Tensor: 
+        # M = feature maps.
+        gap = tf.reduce_max(M, axis=-1)
+        gap = tf.expand_dims(gap, axis=-1)
+
+        gmp = tf.reduce_mean(M, axis=-1)
+        gmp = tf.expand_dims(gmp, axis=-1)
+
+        # concat the gap output and maxpool output to generate a feature map f.
+        f = Concatenate(axis=-1)([gap, gmp])
+
+        # passing f to conv2 and sigmoid to get a spatial attention map.(f_hat)
+        conv_out = Conv2D(filters=1, kernel_size=(1,1))(f)
+        f_hat = sigmoid(conv_out)
+
+        # recalibrating the feature map M, with the spatial attention map (f_hat)
+        return M * f_hat
+    
+    def dual_attention_unit(self, X: tf.Tensor)->tf.Tensor:
+        n_channels = list(X.shape)[-1]
+
+        # extract the feature maps (high-level features)
+        M = Conv2D(n_channels, kernel_size=(3,3), padding='same')(X)
+        M = ReLU()(M)
+        M = Conv2D(n_channels, kernel_size=(3,3), padding='same')(M)
+
+        # passing the feature map(M), to channel and spatial attention, to pass info across
+        # both channels and spatial dimension of the feature tensor.(conv tensor)
+        channel_rescaled_M = self.channel_attention(M)
+        spatial_rescaled_M = self.spatial_attention(M)
+
+        concat = Concatenate(axis=-1)([channel_rescaled_M, spatial_rescaled_M])
+        conv_out = Conv2D(n_channels, kernel_size=(1,1))(concat)
+        return Add()([X, conv_out])
+    
+    def downsampling(self, X: tf.Tensor)->tf.Tensor: 
+        n_channels = list(X.shape)[-1]
+
+        #upper branch (main branch)
+        upper_branch = Conv2D(filters=n_channels, kernel_size=(1,1))(X)
+        upper_branch = ReLU()(upper_branch)
+        upper_branch = Conv2D(filters=n_channels, kernel_size=(3,3), padding='same')(upper_branch)
+        upper_branch = ReLU()(upper_branch)
+
+        # antialiasing downsampling using maxpooling
+        upper_branch = MaxPooling2D()(upper_branch)
+        upper_branch = Conv2D(filters=n_channels * 2, kernel_size=(1,1))(upper_branch)
+
+        # antialiasing downsampling in skip connection.
+        skip_branch = MaxPooling2D()(X)
+        skip_branch = Conv2D(filters=n_channels * 2, kernel_size=(1,1))(skip_branch)
+
+        return Add()([skip_branch, upper_branch])
+    
+    def upsampling(self, X: tf.Tensor)->tf.Tensor: 
+        n_channels = list(X.shape)[-1]
+
+        # upprt barch upsampling with bilinear upsampler.
+        upper_branch = Conv2D(filters=n_channels, kernel_size=(1,1))(X)
+        upper_branch = ReLU()(upper_branch)
+        upper_branch = Conv2D(filters=n_channels, kernel_size=(3,3), padding='same')(upper_branch)
+        upper_branch = ReLU()(upper_branch)
+
+        # bilinear upsampling (upsampling convolution).
+        upper_branch = UpSampling2D()(upper_branch)
+        upper_branch = Conv2D(filters=n_channels//2, kernel_size=(1, 1))(upper_branch)
+
+        # bilinear upsampling for skip connection branch
+        skip_branch = UpSampling2D()(X)
+        skip_branch = Conv2D(filters=n_channels // 2, kernel_size=(1,1))(skip_branch)
+
+        return Add()([upper_branch, skip_branch])
+    
+    def multiscale_residual_block(self, X: tf.Tensor)->tf.Tensor:
+        # downsampled features(multi scale streams)
+        level_1 = X
+        level_2 = self.downsampling(level_1)
+        level_3 = self.downsampling(level_2)
+
+        # appling dual attention to downsampled features
+        level_1_DAU = self.dual_attention_unit(level_1)
+        level_2_DAU = self.dual_attention_unit(level_2)
+        level_3_DAU = self.dual_attention_unit(level_3)
+
+        # applying the skff to dau features.
+        # level1_skff = l1_dau, us(l2_dau), us(us(l3_dau))
+        # level2_skff = ds(l1_dau), l2_dau, us(l3_dau)
+        # level3_skff = ds(ds(l1_dau)), ds(l2_dua), l3_dau
+        level_1_SKFF = self.selective_kernel_feature_fusion(level_1_DAU, self.upsampling(level_2_DAU),
+                                                                        self.upsampling(self.upsampling(level_3_DAU)))
+        
+        level_2_SKFF = self.selective_kernel_feature_fusion(self.downsampling(level_1_DAU), level_2_DAU,
+                                                                                            self.upsampling(level_3_DAU))
+        
+        level_3_SKFF = self.selective_kernel_feature_fusion(self.downsampling(self.downsampling(level_1_DAU)),
+                                                                                self.downsampling(level_2_DAU), level_3_DAU)
+
+        # DAU2 
+        level_1_DAU_2 = self.dual_attention_unit(level_1_SKFF)
+        level_2_DAU_2 = self.upsampling((self.dual_attention_unit(level_2_SKFF)))
+        level_3_DAU_2 = self.upsampling(self.upsampling(self.dual_attention_unit(level_3_SKFF)))
+
+        # SKFF 2
+        SKFF = self.selective_kernel_feature_fusion(level_1_DAU_2, level_2_DAU_2, level_3_DAU_2)
+        conv = Conv2D(self.channels, kernel_size=(3, 3), padding="same")(SKFF)
+
+        return Add()([X, conv])
+    
+    def recursive_residual_group(self, X: tf.Tensor)->tf.Tensor:
+        conv_1 = Conv2D(self.channels, kernel_size=(3,3), padding='same')(X)
+        for _ in range(self.num_mrb):
+            conv_1 = self.multiscale_residual_block(conv_1)
+
+        conv_2 = Conv2D(self.channels, kernel_size=(3,3), padding='same')(conv_1)
+
+        return Add()([conv_2, X])
+    
+    def get_model(self, X): 
+        X1 = Conv2D(self.channels, kernel_size=(3,3), padding='same')(X)
+
+        for _ in range(self.num_rrg):
+            X1 = self.recursive_residual_group(X1)
+
+        conv = Conv2D(3, kernel_size=(3,3), padding='same')(X1)
+        output = Add()([X, conv])
+
+        return output
