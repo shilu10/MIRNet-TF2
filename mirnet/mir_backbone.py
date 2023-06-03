@@ -1,4 +1,22 @@
 class MIRNet(keras.Model):
+    """
+        this class, will be used as a backbone mirnet model class, which will be backbone
+        model for all image restoration tasks.
+        Methods:
+            selective_kernel_feature_fusion(scope: public): builds a skff block.
+            channel_attention(scope: public): builds a channel attention block.
+            spatial_attention(scope: public): builds a spatial attention block.
+            dual_attention_unit(scope: public): builds a dual_attention_unit block.
+            downsampling(scope: public): builds a downsampling block.
+            upsampling(scope: public): builds a upsampling block.
+            multiscale_residual_block(scope: public): builds a mrb.
+            recursive_residual_group(scope: public): builds a rrg.
+            
+        Attrs:
+            num_rrg(dtype: int): number of recursive residual groups in model.
+            num_mrb(dtype: int): number of num_mrb in model.
+            num_channels(dtype: int): number of num_channels groups in model.
+    """
     def __init__(self, num_rrg, num_mrb, num_channels):
         super(MIRNet, self).__init__()
         self.num_rrg = num_rrg 
