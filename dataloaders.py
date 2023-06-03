@@ -9,13 +9,11 @@ class InitializationErro(Exception):
         
 
 class DataLoader:
-    def __init__(self, dname: str, resize_shape: int, batch_size: int):
+    def __init__(self, dname):
         assert dname in ["lol"], "given dataset name is not valid, supported datasets are ['lol']"  
-        assert type(resize_shape) == int, 'Unknown dtype for resize shape, needed Int' 
-        assert type(batch_size) == int, 'Unknown dtype for batch_size, needed Int' 
+        #assert type(resize_shape) == int, 'Unknown dtype for resize shape, needed Int' 
+        #assert type(batch_size) == int, 'Unknown dtype for batch_size, needed Int' 
         self.dname = dname 
-        self.resize_shape = resize_shape
-        self.batch_size = batch_size
         
     def __lr_image_path(self):
         try:
@@ -37,7 +35,7 @@ class DataLoader:
     
     def __lr_image_files(self):
         try:
-        train_lr_data_path, val_lr_data_path = self.__lr_image_path()
+            train_lr_data_path, val_lr_data_path = self.__lr_image_path()
             files = list(paths.list_images(train_lr_data_path))
             files_val = list(paths.list_images(val_lr_data_path))
             return files, files_val
@@ -93,7 +91,7 @@ class DataLoader:
             self.train_data_path = os.path.join("lol_dataset", "our485", "low")
             self.val_data_path = os.path.join("lol_dataset", "eval15", 'low')
         
-    def __load_img(self, img_fpath): 
+    def __read_img(self, img_fpath): 
         try: 
             raw = tf.io.read_file(img_fpath)
             image = tf.image.decode_png(raw)
@@ -103,22 +101,41 @@ class DataLoader:
         except Exception as err:
             return err
         
-    def get_dataset(self, split_name):
-        assert split_name in ("train", 'val'), "unsupported split type"
+    def __load_data(self, lr_img_path, hr_img_path, transform):
+        try: 
+            lr_img = self.__read_img(lr_img_path)
+            hr_img = self.__read_img(hr_img_path)
+
+            return lr_img, hr_img
+        
+        except Exception as err:
+            return err
+        
+    def get_dataset(self, subset, batch_size, transform=True):
+        assert subset in ("train", 'val'), "unsupported split type"
         try:
-            if split_name == "train":
+            if subset == "train":
                 tf_ds = self.__train_tf_dataset()
-                tf_ds = tf_ds.map(self.__preprocess_image, num_parallel_calls=tf.data.AUTOTUNE).cache()
+                tf_ds = tf_ds.map(self.__load_data, num_parallel_calls=tf.data.AUTOTUNE).cache()
+                if transform:
+                    tf_ds = tf_ds.map(random_crop, num_parallel_calls=tf.data.AUTOTUNE).cache()
+                    tf_ds = tf_ds.map(random_flip, num_parallel_calls=tf.data.AUTOTUNE).cache()
+                    tf_ds = tf_ds.map(random_rotate, num_parallel_calls=tf.data.AUTOTUNE).cache()
                 tf_ds = tf_ds.shuffle(buffer_size=50)
-                tf_ds = tf_ds.batch(self.batch_size)
+                tf_ds = tf_ds.batch(batch_size)
                 tf_ds = tf_ds.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
                 return tf_ds
             
             else:
                 tf_ds = self.__val_tf_dataset()
-                tf_ds = tf_ds.map(self.__preprocess_image, num_parallel_calls=tf.data.AUTOTUNE).cache()
+                tf_ds = tf_ds.map(self.__load_data, num_parallel_calls=tf.data.AUTOTUNE).cache()
+                if transform:
+                    tf_ds = tf_ds.map(random_crop, num_parallel_calls=tf.data.AUTOTUNE).cache()
+                    tf_ds = tf_ds.map(random_flip, num_parallel_calls=tf.data.AUTOTUNE).cache()
+                    tf_ds = tf_ds.map(random_rotate, num_parallel_calls=tf.data.AUTOTUNE).cache()
+                    
                 tf_ds = tf_ds.shuffle(buffer_size=5)
-                tf_ds = tf_ds.batch(1)
+                tf_ds = tf_ds.batch(batch_size)
                 tf_ds = tf_ds.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
                 return tf_ds
                 
