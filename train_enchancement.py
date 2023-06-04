@@ -65,7 +65,7 @@ def train():
         )
 
     reduce_lr_loss = keras.callbacks.ReduceLROnPlateau(
-            monitor='val_psnr_delight',
+            monitor='val_psnr_enchancement',
             factor=0.5,
             patience=5,
             verbose=1,
