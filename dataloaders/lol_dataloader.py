@@ -3,7 +3,6 @@ import os
 import shutil 
 from imutils import paths 
 import glob 
-from glob import glob 
 import numpy as np 
 from tensorflow import keras 
 import tensorflow as tf 
