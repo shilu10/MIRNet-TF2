@@ -1,3 +1,9 @@
+import numpy as np 
+from tensorflow import keras 
+import tensorflow as tf 
+from tensorflow.keras import * 
+import os 
+
 def random_crop(lr_img, hr_img, hr_crop_size=128):
     lr_crop_size = hr_crop_size
     lr_img_shape = tf.shape(lr_img)[:2]
@@ -44,3 +50,9 @@ class PSNR(keras.metrics.Metric):
         psnr_score =  tf.image.psnr(pred_y, true_y, max_val=255.0)
         return psnr_score
 
+
+def charbonnier_loss(y_true, y_pred):
+    return tf.reduce_mean(tf.sqrt(tf.square(y_true - y_pred) + tf.square(1e-3)))
+
+def psnr_enchancement(y_true, y_pred):
+    return tf.image.psnr(y_pred, y_true, max_val=255.0)

@@ -1,7 +1,14 @@
 # Reference: https://github.com/krasserm/super-resolution/blob/master/data.py
+import gdown 
+import os 
+import shutil 
+from imutils import paths 
+import glob 
+from glob import glob 
+import numpy as np 
 from tensorflow import keras 
 import tensorflow as tf 
-import numpy as np  
+from tensorflow.keras import *
 
 
 def random_crop(lr_img, hr_img, hr_crop_size=96, scale=2):
@@ -37,7 +44,7 @@ import os
 import tensorflow as tf
 from tensorflow.python.data.experimental import AUTOTUNE
 
-class DIV2KDataLoader:
+class SRDataLoader:
     def __init__(self,
                  scale=2,
                  subset='train',
