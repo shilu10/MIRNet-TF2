@@ -95,5 +95,6 @@ def train():
             callbacks=[early_stopping_callback, model_checkpoint_callback, reduce_lr_loss]
         )
 
+train()
 if __name__ == '__main__':
     train()
