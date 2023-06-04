@@ -1,43 +1,92 @@
-def charbonnier_loss(y_true, y_pred):
-    return tf.reduce_mean(tf.sqrt(tf.square(y_true - y_pred) + tf.square(1e-3)))
+import tensorflow as tf 
+from tensorflow import keras 
+from tensorflow.keras import * 
+from mirnet import get_enchancement_model
+import argparse
+from utils import charbonnier_loss, CharBonnierLoss, psnr_enchancement, PSNR
+from dataloaders import LOLDataLoader
 
-def psnr_enchancement(y_true, y_pred):
-    return tf.image.psnr(y_pred, y_true, max_val=255.0)
+parser = argparse.ArgumentParser()
+
+parser.add_argument('--lr', type=float, default=1e-4)
+parser.add_argument('--loss_function', type=str, default="charbonnier")
+parser.add_argument('--n_epochs', type=int, default=200)
+parser.add_argument('--batch_size', type=int, default=32)
+parser.add_argument('--checkpoint_filepath', type=str, default="checkpoint/saved/")
+parser.add_argument('--num_rrg', type=int, default=3)
+parser.add_argument('--num_mrb', type=int, default=2)
+parser.add_argument('--num_channels', type=int, default=64)
+
+args = parser.parse_args()
 
 
-optimizer = keras.optimizers.Adam(learning_rate=1e-4)
+def train():
+    dataloader = LOLDataLoader("lol")
+    dataloader.initialize()
+    train_ds = dataloader.get_dataset(
+                    subset="train",
+                    batch_size=args.batch_size,
+                    transform=True
+                )
 
-early_stopping_callback = keras.callbacks.EarlyStopping(
-        monitor="val_psnr_enchancement",
-        patience=10,
-        mode='max'
-    )
+    val_ds = dataloader.get_dataset(
+                    subset="val",
+                    batch_size=args.batch_size,
+                    transform=False
+                )
 
-model_checkpoint_callback = keras.callbacks.ModelCheckpoint(
-        f'checkpoint/mirnet_enhancement',
-        monitor="val_psnr_enchancement",
-        mode="max",
-        save_best_only=True,
-        period=1
-    )
+    model = get_enchancement_model(
+            num_rrg=args.num_rrg,
+            num_mrb=args.num_mrb,
+            num_channels=args.num_channels
+        )
 
-reduce_lr_loss = keras.callbacks.ReduceLROnPlateau(
-        monitor='val_psnr_delight',
-        factor=0.5, patience=5,
-        verbose=1,
-        epsilon=1e-7,
-        mode='max'
-    )
+    optimizer = keras.optimizers.Adam(learning_rate=args.lr)
 
-model.compile(
-        optimizer=optimizer,
-        loss=charbonnier_loss,
-        metrics=[psnr_enchancement]
-    )
+    early_stopping_callback = keras.callbacks.EarlyStopping(
+            monitor="val_psnr_enchancement",
+            patience=10,
+            mode='max'
+        )
 
-model.fit(
-        train_ds,
-        validation_data=val_ds,
-        epochs=20,
-        callbacks=[early_stopping_callback, model_checkpoint_callback, reduce_lr_loss]
-    )
+    model_checkpoint_callback = keras.callbacks.ModelCheckpoint(
+            args.checkpoint_filepath+"/best_model.h5",
+            monitor="val_psnr_enchancement",
+            mode="max",
+            save_best_only=True,
+            period=1
+        )
+
+    reduce_lr_loss = keras.callbacks.ReduceLROnPlateau(
+            monitor='val_psnr_delight',
+            factor=0.5,
+            patience=5,
+            verbose=1,
+            epsilon=1e-7,
+            mode='max'
+        )
+
+    if args.loss_function == "charbonnier":
+        loss_func = charbonnier_loss
+
+    if args.loss_function == "l1":
+        loss_func = tf.keras.metrics.MeanAbsoluteError()
+
+    else:
+        loss_func = tf.keras.metrics.MeanSquaredError()
+
+    model.compile(
+            optimizer=optimizer,
+            loss=loss_func,
+            metrics=[psnr_enchancement]
+        )
+
+    model.fit(
+            train_ds,
+            validation_data=val_ds,
+            epochs=args.n_epochs,
+            callbacks=[early_stopping_callback, model_checkpoint_callback, reduce_lr_loss]
+        )
+
+if __name__ == '__main__':
+    train()
