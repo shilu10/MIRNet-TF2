@@ -1,4 +1,4 @@
-from mirnet_backbone import MIRNet
+from mir_backbone import MIRNet
 from tensorflow import keras 
 import tensorflow as tf 
 from tensorflow.keras.layers import Input
