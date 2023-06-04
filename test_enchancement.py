@@ -63,7 +63,20 @@ def test(model):
         
         enhanced_image.save(f"results/LIME/{filename}")
 
+model = get_enchancement_model(
+        num_rrg=args.num_rrg,
+        num_mrb=args.num_mrb,
+        num_channels=args.num_channels
+    )
+model.load_weights(args.checkpoint_filepath + '/best_model.h5')
 
+if args.summary:
+    model.summary()
+
+if args.store_model_summary:
+    tf.keras.utils.plot_model(to_file="mirnet_enchancement.png")
+        
+test(model)
 if __name__ == '__main__':
     model = get_enchancement_model(
         num_rrg=args.num_rrg,
@@ -77,5 +90,5 @@ if __name__ == '__main__':
 
     if args.store_model_summary:
         tf.keras.utils.plot_model(to_file="mirnet_enchancement.png")
-        
+
     test(model)
