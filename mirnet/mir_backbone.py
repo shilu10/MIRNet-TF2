@@ -22,19 +22,19 @@ from tensorflow.keras.layers import Dense, Input, UpSampling2D, Conv2DTranspose,
 try:
     import tensorflow_addons as tfa 
 except:
-    !pip install tensorflow_addons
+    pip install tensorflow_addons
     import tensorflow_addons as tfa
     from tensorflow_addons.layers import InstanceNormalization
 try:
     import gdown 
 except:
-    !pip install gdown --quiet
+    pip install gdown --quiet
     import gdown
     
 try: 
     from imutils import paths 
 except:
-    !pip install imutils  --quiet
+    pip install imutils  --quiet
     from imutils import paths
 from collections import defaultdict
 from tqdm import tqdm
