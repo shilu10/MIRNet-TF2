@@ -147,7 +147,7 @@ class MIRNet(keras.Model):
         return M * f_hat
     
     def dual_attention_unit(self, X: tf.Tensor)->tf.Tensor:
-         """
+        """
             this method, is used to extract the feature map of the input image, by 
             using channel and spatial attention
             Params:
