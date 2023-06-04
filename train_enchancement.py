@@ -12,13 +12,14 @@ parser.add_argument('--lr', type=float, default=1e-4)
 parser.add_argument('--loss_function', type=str, default="charbonnier")
 parser.add_argument('--n_epochs', type=int, default=200)
 parser.add_argument('--batch_size', type=int, default=32)
-parser.add_argument('--checkpoint_filepath', type=str, default="checkpoint/saved/")
+parser.add_argument('--checkpoint_filepath', type=str, default="checkpoint/saved/enchancement/")
 parser.add_argument('--num_rrg', type=int, default=3)
 parser.add_argument('--num_mrb', type=int, default=2)
 parser.add_argument('--num_channels', type=int, default=64)
+parser.add_argument('--summary', type=bool, default=False)
+parser.add_argument('--store_model_summary', type=bool, default=False)
 
 args = parser.parse_args()
-
 
 def train():
     dataloader = LOLDataLoader("lol")
@@ -40,6 +41,12 @@ def train():
             num_mrb=args.num_mrb,
             num_channels=args.num_channels
         )
+
+    if args.summary:
+        model.summary()
+
+    if args.store_model_summary:
+        tf.keras.utils.plot_model(to_file="mirnet_enchancement.png")
 
     optimizer = keras.optimizers.Adam(learning_rate=args.lr)
 
