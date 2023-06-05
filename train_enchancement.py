@@ -99,7 +99,7 @@ def train():
             train_ds,
             validation_data=val_ds,
             epochs=args.n_epochs,
-            callbacks=[early_stopping_callback, model_checkpoint_callback, reduce_lr_loss]
+         #   callbacks=[early_stopping_callback, model_checkpoint_callback, reduce_lr_loss]
         )
 
 
