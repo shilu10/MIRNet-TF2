@@ -6,6 +6,8 @@ from datetime import datetime
 from collections import *
 from tqdm import tqdm
 
+
+
 class Trainer:
     def __init__(self, model, loss_func, metric_func, optimizer, ckpt, ckpt_manager, epochs):
         self.model = model 
