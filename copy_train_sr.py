@@ -95,45 +95,18 @@ def train():
     else:
         loss_func = tf.keras.metrics.MeanSquaredError()
 
-    if args.custom_trainer:
-        checkpoint = tf.train.Checkpoint(
+    model.compile(
             optimizer=optimizer,
-            model=model,
-            epoch=tf.Variable(1)
+            loss=loss_func,
+            metrics=[val_psnr_sr]
         )
 
-        manager = tf.train.CheckpointManager(
-            checkpoint,
-            directory=args.checkpoint_filepath,
-            max_to_keep=5
+    model.fit(
+            train_ds,
+            validation_data=val_ds,
+            epochs=args.n_epochs,
+            callbacks=[early_stopping_callback, model_checkpoint_callback, reduce_lr_loss]
         )
-
-        status = checkpoint.restore(manager.latest_checkpoint)
-        trainer = Trainer(
-                    model=model,
-                    loss_func=loss_func,
-                    metric_func=psnr_enchancement,
-                    optimizer=optimizer,
-                    ckpt=checkpoint,
-                    ckpt_manager=manager,
-                    epochs=args.epcohs
-                )
-
-        trainer.train(train_ds, val_ds)
-
-    else:
-        model.compile(
-                optimizer=optimizer,
-                loss=loss_func,
-                metrics=[psnr_enchancement]
-            )
-
-        model.fit(
-                train_ds,
-                validation_data=val_ds,
-                epochs=args.n_epochs,
-                callbacks=[early_stopping_callback, model_checkpoint_callback, reduce_lr_loss]
-            )
 
 if __name__ == '__main__':
     train()

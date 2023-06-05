@@ -5,6 +5,7 @@ from mirnet import get_denoising_model
 import argparse
 from utils import charbonnier_loss, CharBonnierLoss, psnr_denoising, PSNR
 from dataloaders import SIDDDataLoader
+from custom_trainer import Trainer
 
 parser = argparse.ArgumentParser()
 
@@ -18,10 +19,13 @@ parser.add_argument('--num_mrb', type=int, default=2)
 parser.add_argument('--num_channels', type=int, default=64)
 parser.add_argument('--summary', type=bool, default=False)
 parser.add_argument('--store_model_summary', type=bool, default=False)
+parser.add_argument('--gpu', type=str, default='0')
+parser.add_argument('--use_custom_trainer', type=bool, default=False)
 
 args = parser.parse_args()
 
 def train():
+    os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
     dataloader = SIDDDataLoader("sidd")
     dataloader.initialize()
     train_ds = dataloader.get_dataset(
@@ -82,18 +86,47 @@ def train():
     else:
         loss_func = tf.keras.metrics.MeanSquaredError()
 
-    model.compile(
+    if args.use_custom_trainer:
+        checkpoint = tf.train.Checkpoint(
             optimizer=optimizer,
-            loss=loss_func,
-            metrics=[psnr_denoising]
+            model=model,
+            epoch=tf.Variable(1)
         )
 
-    model.fit(
-            train_ds,
-            validation_data=val_ds,
-            epochs=args.n_epochs,
-            callbacks=[early_stopping_callback, model_checkpoint_callback, reduce_lr_loss]
+        manager = tf.train.CheckpointManager(
+            checkpoint,
+            directory=args.checkpoint_filepath,
+            max_to_keep=5
         )
+
+        status = checkpoint.restore(manager.latest_checkpoint)
+        trainer = Trainer(
+                    model=model,
+                    loss_func=loss_func,
+                    metric_func=psnr_enchancement,
+                    optimizer=optimizer,
+                    ckpt=checkpoint,
+                    ckpt_manager=manager,
+                    epochs=args.epcohs
+                )
+
+        trainer.train(train_ds, val_ds)
+        
+    
+    else: 
+        model.compile(
+                optimizer=optimizer,
+                loss=loss_func,
+                metrics=[psnr_denoising]
+            )
+
+        model.fit(
+                train_ds,
+                validation_data=val_ds,
+                epochs=args.n_epochs,
+                callbacks=[early_stopping_callback, model_checkpoint_callback, reduce_lr_loss]
+            )
+    
 
 
 if __name__ == '__main__':
