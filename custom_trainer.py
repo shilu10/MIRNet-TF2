@@ -28,6 +28,7 @@ class Trainer:
     def train_step(self, train_batch):
 
         source_img_batch, target_img_batch = train_batch
+        print(source_img_batch, target_img_batch, 'source and target in train_step')
         with tf.GradientTape() as tape: 
             pred_image_batch = self.model(source_img_batch)
             loss_val = self.loss_func(pred_image_batch, target_img_batch)
