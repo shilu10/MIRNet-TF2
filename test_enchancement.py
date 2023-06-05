@@ -23,7 +23,7 @@ parser.add_argument('--num_mrb', type=int, default=2)
 parser.add_argument('--num_channels', type=int, default=64)
 parser.add_argument('--summary', type=bool, default=False)
 parser.add_argument('--store_model_summary', type=bool, default=False)
-
+parser.add_argument('--file_extension', type=str, default='bmp')
 
 args = parser.parse_args()
 
@@ -31,7 +31,7 @@ def test(model):
 
     lowlight_test_images_path = args.test_path
 
-    for test_file in glob.glob(lowlight_test_images_path + "*.bmp"):
+    for test_file in glob.glob(lowlight_test_images_path + f"*.{args.file_extension}"):
         filename = test_file.split("/")[-1]
         data_lowlight_path = test_file
         original_img = Image.open(data_lowlight_path)
@@ -61,7 +61,9 @@ def test(model):
             plt.subplot(122)
             plt.imshow(enhanced_image/255.0)
         
-        enhanced_image.save(f"results/LIME/{filename}")
+        save_file_dir = lowlight_test_images_path.replace('test', 'results')
+        save_file_path = save_file_dir + "/" + filename
+        enhanced_image.save(fsave_file_path)
 
 
 if __name__ == '__main__':
@@ -70,6 +72,7 @@ if __name__ == '__main__':
         num_mrb=args.num_mrb,
         num_channels=args.num_channels
     )
+    
     model.load_weights(args.checkpoint_filepath + '/best_model.h5')
 
     if args.summary:

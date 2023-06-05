@@ -61,7 +61,9 @@ def test(model):
             plt.subplot(122)
             plt.imshow(enhanced_image/255.0)
         
-        enhanced_image.save(f"results/denoise/{filename}")
+        save_file_dir = lowlight_test_images_path.replace('test', 'results')
+        save_file_path = save_file_dir + "/" + filename
+        enhanced_image.save(fsave_file_path)
 
 
 if __name__ == '__main__':
@@ -70,6 +72,7 @@ if __name__ == '__main__':
         num_mrb=args.num_mrb,
         num_channels=args.num_channels
     )
+    
     model.load_weights(args.checkpoint_filepath + '/best_model.h5')
 
     if args.summary:
