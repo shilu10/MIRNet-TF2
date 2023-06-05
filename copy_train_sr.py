@@ -1,43 +1,43 @@
 import tensorflow as tf 
 from tensorflow import keras 
 from tensorflow.keras import * 
-from mirnet import get_super_resolution_model
+from .mirnet import get_super_resolution_model
 import argparse
-from utils import charbonnier_loss, CharBonnierLoss, psnr_sr, PSNR
-from dataloaders import SRDataLoader
-
+from .utils import charbonnier_loss, CharBonnierLoss, psnr_sr, PSNR
+from .dataloaders import SRDataLoader
+from .train import Trainer
 
 
 def train(custom_training=True, epochs=1):
     train_loader = SRDataLoader(
             scale=4,            
-            downgrade=args.downgrade,
+            downgrade="bicubic",
             subset='train'
         )      
                          
     train_ds = train_loader.dataset(
-            batch_size=args.batch_size,        
+            batch_size=4,        
             random_transform=True, 
             repeat_count=None
         )  
 
     val_loader = SRDataLoader(
-            scale=args.scale_factor,            
-            downgrade=args.downgrade,
+            scale=4,            
+            downgrade="bicubic",
             subset='val'
         )      
                          
     val_ds = val_loader.dataset(
-            batch_size=args.batch_size,        
+            batch_size=1,        
             random_transform=False, 
             repeat_count=None
         )  
 
     model = get_super_resolution_model(
-            num_rrg=args.num_rrg,
-            num_mrb=args.num_mrb,
-            num_channels=args.num_channels,
-            scale_factor=args.scale_factor
+            num_rrg=3,
+            num_mrb=2,
+            num_channels=64,
+            scale_factor=4
         )
 
     
