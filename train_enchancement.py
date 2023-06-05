@@ -1,7 +1,7 @@
 import tensorflow as tf 
 from tensorflow import keras 
 from tensorflow.keras import * 
-from mirnet import get_enchancement_model
+#from mirnet import get_enchancement_model
 import argparse
 from utils import charbonnier_loss, CharBonnierLoss, psnr_enchancement, PSNR
 from dataloaders import LOLDataLoader
