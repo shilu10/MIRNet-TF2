@@ -1,11 +1,12 @@
 import tensorflow as tf 
 from tensorflow import keras 
 from tensorflow.keras import * 
-#from mirnet import get_enchancement_model
+from mirnet import get_enchancement_model
 import argparse
 from utils import charbonnier_loss, CharBonnierLoss, psnr_enchancement, PSNR
 from dataloaders import LOLDataLoader
-from mirnet import MIRNet
+from custom_trainer import Trainer
+
 
 parser = argparse.ArgumentParser()
 
@@ -19,10 +20,14 @@ parser.add_argument('--num_mrb', type=int, default=2)
 parser.add_argument('--num_channels', type=int, default=64)
 parser.add_argument('--summary', type=bool, default=False)
 parser.add_argument('--store_model_summary', type=bool, default=False)
+parser.add_argument('--gpu', type=str, default='0')
+parser.add_argument('--use_custom_trainer', type=bool, default=False)
+
 
 args = parser.parse_args()
 
 def train():
+    os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
     dataloader = LOLDataLoader("lol")
     dataloader.initialize()
     train_ds = dataloader.get_dataset(
@@ -36,17 +41,12 @@ def train():
                     batch_size=args.batch_size,
                     transform=False
                 )
-
-    mir_x = MIRNet(3, 2, 64)
-    x = Input(shape=(None, None, 3))
-    out = mir_x.get_model(x)
-    model = Model(inputs=x, outputs=out)
     
-    #model = get_enchancement_model(
-     #       num_rrg=args.num_rrg,
-      #      num_mrb=args.num_mrb,
-       #     num_channels=args.num_channels
-        #)
+    model = get_enchancement_model(
+            num_rrg=args.num_rrg,
+            num_mrb=args.num_mrb,
+            num_channels=args.num_channels
+        )
 
     if args.summary:
         model.summary()
@@ -88,20 +88,45 @@ def train():
     else:
         loss_func = tf.keras.metrics.MeanSquaredError()
 
-    model.compile(
+    if not args.custom_trainer:
+        model.compile(
+                optimizer=optimizer,
+                loss=loss_func,
+                metrics=[psnr_enchancement]
+            )
+
+        model.fit(
+                train_ds,
+                validation_data=val_ds,
+                epochs=args.n_epochs,
+                callbacks=[early_stopping_callback, model_checkpoint_callback, reduce_lr_loss]
+            )
+
+    if args.custom_trainer:
+        checkpoint = tf.train.Checkpoint(
             optimizer=optimizer,
-            loss=loss_func,
-            metrics=[psnr_enchancement]
+            model=model,
+            epoch=tf.Variable(1)
         )
 
-    print(train_ds, val_ds, loss_func)
-    model.fit(
-            train_ds,
-            validation_data=val_ds,
-            epochs=args.n_epochs,
-         #   callbacks=[early_stopping_callback, model_checkpoint_callback, reduce_lr_loss]
+        manager = tf.train.CheckpointManager(
+            checkpoint,
+            directory="saved/zerodce_new",
+            max_to_keep=5
         )
 
+        status = checkpoint.restore(manager.latest_checkpoint)
+        trainer = Trainer(
+                    model=model,
+                    loss_func=loss_func,
+                    metric_func=psnr_enchancement,
+                    optimizer=optimizer,
+                    ckpt=checkpoint,
+                    ckpt_manager=manager,
+                    epochs=args.epcohs
+                )
+
+        trainer.train(train_ds, val_ds)
 
 if __name__ == '__main__':
     train()
