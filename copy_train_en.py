@@ -45,7 +45,7 @@ def train():
         #)
     mir_x = MIRNet(64, 3, 2)
     x = Input(shape=(None, None, 3))
-    out = mir_x.main_model(x)
+    out = mir_x.get_model(x)
     model = Model(inputs=x, outputs=out)
 
 
