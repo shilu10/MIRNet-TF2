@@ -5,40 +5,53 @@ from mirnet import get_enchancement_model, get_denoising_model, get_super_resolu
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--input_shape', type=tuple, default=(128, 128, 3))
 parser.add_argument('--scale_factor', type=int, default=4)
 parser.add_argument('--saved_model_path', type=str, default="checkpoint/saved/super_resolution/best_model.h5")
-parser.add_argument('--tflite_model_path', type=str, default='checkpoint/saved/')
+parser.add_argument('--tflite_model_path', type=str, default='checkpoint/saved/super_resolution/best_model.tflite')
+parser.add_argument('--mode', type=str, default='super_resolution')
+parser.add_argument('--num_rrg', type=str, default='super_resolution')
+parser.add_argument('--num_mrb', type=str, default='super_resolution')
+parser.add_argument('--num_channels', type=str, default='super_resolution')
+parser.add_argument('--optimize', type=bool, default=False)
 
-
-SCALE = 4
-INPUT_SHAPE=(512, 512, 3)
-
-MODEL_PATH = "./saved/models/interp_esr.h5"
-TFLITE_MODEL_PATH = './saved/models/esrgan.tflite'
+args = parser.parse_args()
 
 def main():
+    if args.mode == "super_resolution":
+        model = get_super_resolution_model(
+            num_rrg=args.num_rrg,
+            num_mrb=args.num_mrb,
+            num_channels=args.num_channels,
+            scale_factor=args.scale_factor
+        )
 
-    trained_model = load_model(MODEL_PATH, custom_objects={'tf': tf})
+    if args.model == "denoise":
+        model = get_denoising_model(
+            num_rrg=args.num_rrg,
+            num_mrb=args.num_mrb,
+            num_channels=args.num_channels
+        )
+
+    else:
+        model = get_enchancement_model(
+            num_rrg=args.num_rrg,
+            num_mrb=args.num_mrb,
+            num_channels=args.num_channels
+        )
+
+    trained_model = load_model(args.saved_model_path, custom_objects={'tf': tf})
     weights = trained_model.get_weights()
-    
-    model = rrdb_net(input_shape=INPUT_SHAPE,scale_factor=SCALE)
+
     model.set_weights(weights)
+
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
-    #converter.optimizations = [tf.lite.Optimize.DEFAULT]
+
+    if args.optimize
+        converter.optimizations = [tf.lite.Optimize.DEFAULT]
+
     tflite_model = converter.convert()
-    with open(TFLITE_MODEL_PATH, 'wb') as f:
+    with open(args.tflite_model_path, 'wb') as f:
         f.write(tflite_model)
-
-
-
-
-
-
-
-
-
-
 
 
 
