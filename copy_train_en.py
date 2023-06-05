@@ -6,7 +6,7 @@ import argparse
 from utils import charbonnier_loss, CharBonnierLoss, psnr_enchancement, PSNR
 from dataloaders import LOLDataLoader
 from custom_trainer import Trainer
-
+from mirnet import MIRNet
 
 parser = argparse.ArgumentParser()
 
@@ -43,7 +43,7 @@ def train():
        #     num_mrb=args.num_mrb,
       #      num_channels=args.num_channels
         #)
-    mir_x = MIRNet(64, config.num_mrb, config.num_rrg)
+    mir_x = MIRNet(64, 3, 2)
     x = Input(shape=(None, None, 3))
     out = mir_x.main_model(x)
     model = Model(inputs=x, outputs=out)
