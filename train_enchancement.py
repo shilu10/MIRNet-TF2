@@ -5,6 +5,7 @@ from mirnet import get_enchancement_model
 import argparse
 from utils import charbonnier_loss, CharBonnierLoss, psnr_enchancement, PSNR
 from dataloaders import LOLDataLoader
+from mirnet import MIRNet
 
 parser = argparse.ArgumentParser()
 
@@ -36,11 +37,16 @@ def train():
                     transform=False
                 )
 
-    model = get_enchancement_model(
-            num_rrg=args.num_rrg,
-            num_mrb=args.num_mrb,
-            num_channels=args.num_channels
-        )
+    mir_x = MIRNet(64, config.num_mrb, config.num_rrg)
+    x = Input(shape=(None, None, 3))
+    out = mir_x.main_model(x)
+    model = Model(inputs=x, outputs=out)
+    
+    #model = get_enchancement_model(
+     #       num_rrg=args.num_rrg,
+      #      num_mrb=args.num_mrb,
+       #     num_channels=args.num_channels
+        #)
 
     if args.summary:
         model.summary()
