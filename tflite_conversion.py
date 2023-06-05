@@ -8,7 +8,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--input_shape', type=tuple, default=(128, 128, 3))
 parser.add_argument('--scale_factor', type=int, default=4)
 parser.add_argument('--saved_model_path', type=str, default="checkpoint/saved/super_resolution/best_model.h5")
-parser.add_argument('--scale_factor', type=int, default=4)
+parser.add_argument('--tflite_model_path', type=str, default='checkpoint/saved/')
 
 
 SCALE = 4
