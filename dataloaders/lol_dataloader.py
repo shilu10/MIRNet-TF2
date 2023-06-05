@@ -7,7 +7,7 @@ import numpy as np
 from tensorflow import keras 
 import tensorflow as tf 
 from tensorflow.keras import *
-
+from .utils import random_rotate, random_crop, random_flip
 
 
 class UnsuuportedFileExtension(Exception):
