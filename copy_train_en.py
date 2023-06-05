@@ -43,7 +43,7 @@ def train():
        #     num_mrb=args.num_mrb,
       #      num_channels=args.num_channels
         #)
-    mir_x = MIRNet(64, 3, 2)
+    mir_x = MIRNet(num_rrg=3, num_mrb=2, num_channels=64)
     x = Input(shape=(None, None, 3))
     out = mir_x.get_model(x)
     model = Model(inputs=x, outputs=out)

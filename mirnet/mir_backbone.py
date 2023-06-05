@@ -40,7 +40,7 @@ class MIRNet(keras.Model):
             num_mrb(dtype: int): number of num_mrb in model.
             num_channels(dtype: int): number of num_channels groups in model.
     """
-    def __init__(self, num_rrg, num_mrb, num_channels):
+    def __init__(self, num_rrg=3, num_mrb=2, num_channels=64):
         super(MIRNet, self).__init__()
         self.num_rrg = num_rrg 
         self.num_mrb = num_mrb 
