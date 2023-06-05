@@ -5,7 +5,7 @@ from .mirnet import get_super_resolution_model
 import argparse
 from .utils import charbonnier_loss, CharBonnierLoss, psnr_sr, PSNR
 from .dataloaders import SRDataLoader
-from .train import Trainer
+from .custom_trainer import Trainer
 
 
 def train(custom_training=True, epochs=1):
@@ -24,7 +24,7 @@ def train(custom_training=True, epochs=1):
     val_loader = SRDataLoader(
             scale=4,            
             downgrade="bicubic",
-            subset='val'
+            subset='valid'
         )      
                          
     val_ds = val_loader.dataset(
