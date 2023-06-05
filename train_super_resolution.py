@@ -39,7 +39,7 @@ def train():
     val_loader = SRDataLoader(
             scale=args.scale_factor,            
             downgrade=args.downgrade,
-            subset='val'
+            subset='valid'
         )      
                          
     val_ds = val_loader.dataset(
