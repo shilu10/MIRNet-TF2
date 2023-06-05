@@ -42,7 +42,7 @@ class Trainer:
        
         train_result = {
             "loss": self.loss_tracker.result(),
-            "psnr"; train_psnr
+            "psnr": train_psnr
         }
         
         return loss_dict
