@@ -73,6 +73,7 @@ def train():
         checkpoint, directory="saved/zerodce_new", max_to_keep=5)
     status = checkpoint.restore(manager.latest_checkpoint)
 
+    print(train_ds, val_ds)
     trainer = Trainer(model, loss_func, psnr_enchancement, optimizer, checkpoint, manager, 1)
     trainer.train(train_ds, val_ds)
 

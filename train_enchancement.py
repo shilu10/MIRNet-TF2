@@ -94,6 +94,7 @@ def train():
             metrics=[psnr_enchancement]
         )
 
+    print(train_ds, val_ds)
     model.fit(
             train_ds,
             validation_data=val_ds,
