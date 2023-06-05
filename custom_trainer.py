@@ -2,7 +2,9 @@ import tensorflow as tf
 from tensorflow import keras 
 from tensorflow.keras import *
 from tensorflow.keras.layers import * 
-
+from datetime import datetime
+from collections import *
+from tqdm import tqdm
 
 class Trainer:
     def __init__(self, model, loss_func, metric_func, optimizer, ckpt, ckpt_manager, epochs):
@@ -40,7 +42,7 @@ class Trainer:
        
         train_result = {
             "loss": self.loss_tracker.result(),
-            "metric"; train_psnr
+            "psnr"; train_psnr
         }
         
         return loss_dict
