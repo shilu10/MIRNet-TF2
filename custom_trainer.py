@@ -27,6 +27,7 @@ class Trainer:
         log_dir = 'loss/' + datetime.now().strftime("%Y%m%d-%H%M%S") + '/val'
         self.val_writer = tf.summary.create_file_writer(log_dir)
     
+    @tf.function
     def train_step(self, train_batch):
 
         source_img_batch, target_img_batch = train_batch
