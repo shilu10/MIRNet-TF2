@@ -17,6 +17,9 @@ class Trainer:
         self.optimizer = optimizer
         self.loss_func = loss_func
         self.metric_func = metric_func
+
+        self.metric_tracker = keras.metrics.Mean() 
+        self.val_metric_tracker = keras.metrics.Mean() 
         
         self.loss_tracker = keras.metrics.Mean()
         self.val_loss_tracker = keras.metrics.Mean()
@@ -35,23 +38,23 @@ class Trainer:
             pred_image_batch = self.model(source_img_batch)
             #loss_val = self.loss_func(pred_image_batch, target_img_batch)
             loss_val = tf.reduce_mean(tf.sqrt(tf.square(target_img_batch - pred_image_batch) + tf.square(1e-3)))
-            print(loss_val, "loss")
+
         params = self.model.trainable_variables
         grads = tape.gradient(loss_val, params)
-        print("grads", grads[0])
         
         self.optimizer.apply_gradients(zip(grads, params))
         self.loss_tracker.update_state(loss_val)
-        print("updated")
 
+        # train psnr metric tracker.
         train_psnr = self.metric_func(pred_image_batch, target_img_batch)
-       
+        self.metric_tracker.update_state(train_psnr)
+
         train_result = {
             "loss": self.loss_tracker.result(),
-            "psnr": train_psnr
+            "psnr": self.metric_tracker.result()
         }
         
-        return loss_dict
+        return train_result
     
     def test_step(self, val_batch):
 
@@ -60,14 +63,17 @@ class Trainer:
         
         loss_val = self.loss_func(pred_image_batch, target_img_batch)
         self.val_loss_tracker.update_state(loss_val)
+        
+        # psnr metric tracker.
         val_psnr = self.metric_func(pred_image_batch, target_img_batch)
+        self.val_metric_tracker.update_state(val_psnr)
 
         val_result = {
             "loss": self.val_loss_tracker.result(),
-            "psnr": val_psnr
+            "psnr": self.val_metric_tracker.result()
         }
         
-        return loss_dict
+        return val_result
     
     def compute_loss(self, original, enchanced, curve_params):
         illumination_loss = 200 * self.illumination_smoothness_loss_func(curve_params)
@@ -98,23 +104,26 @@ class Trainer:
             print(f"Epoch: {epoch}: ")
             for step, training_batch in tqdm(enumerate(train_ds), total=len(train_ds)): 
                 train_result = self.train_step(training_batch)
-                train_loss = train_result["loss"]
-                train_psnr = train_result["psnr"]
+                train_loss = train_result["loss"].numpy()
+                train_psnr = train_result["psnr"].numpy()
 
             for step, val_batch in enumerate(val_ds):
                 val_result = self.test_step(val_batch)
-                val_loss = val_result["loss"]
-                val_psnr = val_result['psnr']
+                val_loss = val_result["loss"].numpy()
+                val_psnr = val_result['psnr'].numpy()
         
             self.ckpt.epoch.assign_add(1)
             history["train_loss"].append(train_loss) 
-            history["val_loss"].append(val_loss) 
-        
+            history["val_loss"].append(val_loss)
+            
+
             with self.train_writer.as_default(step=epoch):
                 tf.summary.scalar('train_loss', train_loss)
+                tf.summary.scalar('train_psnr', train_psnr)
 
             with self.val_writer.as_default(step=epoch):
                 tf.summary.scalar('val_loss', val_loss)
+                tf.summary.scalar('train_psnr', val_psnr)
             
 
             print(f'train_loss: {train_loss}, train_psnr: {train_psnr} \n')
@@ -122,9 +131,11 @@ class Trainer:
             
             #reset states of training step
             self.loss_tracker.reset_states()
+            self.metric_tracker.reset_states()
             
             # reset states of the val step
             self.val_loss_tracker.reset_states()
+            self.val_metric_tracker.reset_states()
                
             if epoch %2 == 0: 
                 save_path = self.ckpt_manager.save()
