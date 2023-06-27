@@ -27,7 +27,7 @@ class Trainer:
         log_dir = 'loss/' + datetime.now().strftime("%Y%m%d-%H%M%S") + '/val'
         self.val_writer = tf.summary.create_file_writer(log_dir)
     
-    @tf.function
+    #@tf.function
     def train_step(self, train_batch):
 
         source_img_batch, target_img_batch = train_batch
@@ -35,7 +35,8 @@ class Trainer:
         with tf.GradientTape() as tape: 
             pred_image_batch = self.model(source_img_batch)
             print(pred_image_batch[0], "prediction ")
-            loss_val = self.loss_func(pred_image_batch, target_img_batch)
+            #loss_val = self.loss_func(pred_image_batch, target_img_batch)
+            loss_val = tf.reduce_mean(tf.sqrt(tf.square(target_img_batch - pred_image_batch) + tf.square(1e-3)))
             print(loss_val, "loss")
         params = self.model.trainable_variables
         grads = tape.gradient(loss_val, params)
