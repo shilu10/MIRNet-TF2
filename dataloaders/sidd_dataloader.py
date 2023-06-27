@@ -105,15 +105,15 @@ class SIDDDataLoader:
     
     def initialize(self):
         try: 
-            if self.dname == "ssid":
+            if self.dname == "sidd":
                 SIDD_DATA_PATH = 'https://competitions.codalab.org/my/datasets/download/a26784fe-cf33-48c2-b61f-94b299dbc0f2'
 
                 if not os.path.exists('SIDD_Small_sRGB_Only/Data'):
                     os.system(f'wget {SIDD_DATA_PATH}')
-                    os.system(f'unzip -q a26784fe-cf33-48c2-b61f-94b299dbc0f2.1')
+                    os.system(f'unzip -q a26784fe-cf33-48c2-b61f-94b299dbc0f2')
 
-                if (os.path.exists("a26784fe-cf33-48c2-b61f-94b299dbc0f2.1") and not os.path.exists("SIDD_Small_sRGB_Only/")):
-                    os.system(f'unzip -q a26784fe-cf33-48c2-b61f-94b299dbc0f2.1')
+                if (os.path.exists("a26784fe-cf33-48c2-b61f-94b299dbc0f2") and not os.path.exists("SIDD_Small_sRGB_Only/")):
+                    os.system(f'unzip -q a26784fe-cf33-48c2-b61f-94b299dbc0f2')
                     
         except Exception as err:
             return err 
