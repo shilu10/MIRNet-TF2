@@ -37,7 +37,7 @@ class Trainer:
             loss_val = self.loss_func(pred_image_batch, target_img_batch)
             print(loss_val, "loss")
         params = self.model.trainable_variables
-        print(params.shape, params, "params")
+        print( params, "params")
         grads = tape.gradient(loss_val, params)
         print(grads)
         
