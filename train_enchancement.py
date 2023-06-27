@@ -91,7 +91,7 @@ def train():
     else:
         loss_func = tf.keras.metrics.MeanSquaredError()
 
-    if args.custom_trainer:
+    if args.use_custom_trainer:
         checkpoint = tf.train.Checkpoint(
             optimizer=optimizer,
             model=model,
