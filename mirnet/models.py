@@ -24,7 +24,8 @@ def get_enchancement_model(num_rrg: int, num_mrb: int, num_channels: int)->keras
                              num_channels=num_channels
                             )
     inputs = Input(shape=(None, None, 3))
-    model = Model(inputs, mirnet_backbone.get_model(inputs))
+    outputs = mirnet_backbone.get_model(inputs)
+    model = Model(inputs, outputs)
     
     return model
 
@@ -47,7 +48,8 @@ def get_denoising_model(num_rrg:int, num_mrb:int, num_channels: int)->keras.Mode
                              num_channels=num_channels
                             )
     inputs = Input(shape=(None, None, 3))
-    model = Model(inputs, mirnet_backbone.get_model(inputs))
+    outputs = mirnet_backbone.get_model(inputs)
+    model = Model(inputs, outputs)
     
     return model
 
