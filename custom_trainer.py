@@ -38,9 +38,11 @@ class Trainer:
             print(loss_val, "loss")
         params = self.model.trainable_variables
         grads = tape.gradient(loss_val, params)
+        print("grads")
         
         self.optimizer.apply_gradients(zip(grads, params))
         self.loss_tracker.update_state(loss_val)
+        print("updated")
 
         train_psnr = self.metric_func(pred_image_batch, target_img_batch)
        
