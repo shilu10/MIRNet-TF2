@@ -116,6 +116,7 @@ class SIDDDataLoader:
                     os.system(f'unzip -q a26784fe-cf33-48c2-b61f-94b299dbc0f2')
                     
         except Exception as err:
+            print(err, "rr")
             return err 
         
     def __read_img(self, img_fpath): 
