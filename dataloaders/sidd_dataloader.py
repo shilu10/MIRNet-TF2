@@ -74,10 +74,10 @@ class SIDDDataLoader:
             num_train = 150
             
             _, gt_images_path = self.__image_files()
-            train_noisy_data_path = gt_images_path[: num_train]
-            val_noisy_data_path = gt_images_path[num_train+1: ]
+            train_gt_data_path = gt_images_path[: num_train]
+            val_gt_data_path = gt_images_path[num_train+1: ]
 
-            return train_noisy_data_path, val_noisy_data_path
+            return train_gt_data_path, val_gt_data_path
         
         except Exception as err:
             return err
@@ -138,6 +138,10 @@ class SIDDDataLoader:
         try: 
             lr_img = self.__read_img(lr_img_path)
             hr_img = self.__read_img(hr_img_path)
+
+            # resizing
+            lr_img = tf.image.resize(lr_img, (224, 224))
+            hr_img = tf.image.resize(hr_img, (224, 224))
 
             return lr_img, hr_img
         
