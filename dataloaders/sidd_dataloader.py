@@ -109,7 +109,10 @@ class SIDDDataLoader:
                 SIDD_DATA_PATH = 'https://competitions.codalab.org/my/datasets/download/a26784fe-cf33-48c2-b61f-94b299dbc0f2'
 
                 if not os.path.exists('SIDD_Small_sRGB_Only/Data'):
-                    os.system(f'wget {SIDD_DATA_PATH}')
+                    #os.system(f'wget {SIDD_DATA_PATH}')
+                    # https://drive.google.com/file/d/10TC19ND0qeqUCG_mvfhtOjmXkSunYyud/view?usp=sharing
+                    url = "https://drive.google.com/uc?id=10TC19ND0qeqUCG_mvfhtOjmXkSunYyud"
+                    gdown.download(url)
                     os.system(f'unzip -q a26784fe-cf33-48c2-b61f-94b299dbc0f2')
 
                 if (os.path.exists("a26784fe-cf33-48c2-b61f-94b299dbc0f2") and not os.path.exists("SIDD_Small_sRGB_Only/")):
