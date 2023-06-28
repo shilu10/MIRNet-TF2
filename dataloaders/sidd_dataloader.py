@@ -113,10 +113,12 @@ class SIDDDataLoader:
                     # https://drive.google.com/file/d/10TC19ND0qeqUCG_mvfhtOjmXkSunYyud/view?usp=sharing
                     url = "https://drive.google.com/uc?id=10TC19ND0qeqUCG_mvfhtOjmXkSunYyud"
                     gdown.download(url)
-                    os.system(f'unzip -q a26784fe-cf33-48c2-b61f-94b299dbc0f2')
+                    os.system(f'unzip -q smartphone-image-denoising-dataset.zip')
+                    os.system(f'rm smartphone-image-denoising-dataset.zip')
 
-                if (os.path.exists("a26784fe-cf33-48c2-b61f-94b299dbc0f2") and not os.path.exists("SIDD_Small_sRGB_Only/")):
-                    os.system(f'unzip -q a26784fe-cf33-48c2-b61f-94b299dbc0f2')
+                if (os.path.exists("smartphone-image-denoising-dataset.zip") and not os.path.exists("SIDD_Small_sRGB_Only/")):
+                    os.system(f'unzip -q smartphone-image-denoising-dataset.zip')
+                    os.system(f'rm smartphone-image-denoising-dataset.zip')
                     
         except Exception as err:
             print(err, "rr")
