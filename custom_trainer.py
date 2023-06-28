@@ -89,7 +89,11 @@ class Trainer:
         pass 
     
     def save_weights(self, filepath):
-        pass 
+        fname = "enhancement_model"
+        filepath = filepath + fname
+        self.model.save_weights(fname)
+
+        print("Model Serialized successfully..")
     
     def train(self, train_ds, val_ds):
         history = defaultdict(list)
@@ -142,6 +146,8 @@ class Trainer:
                 
                 print("Saved checkpoint for step {}: {}".format(int(self.ckpt.epoch), save_path))
             
+        self.save_weights(".")
+
         return self.model
     
     def compute_psnr(self):

@@ -3,7 +3,7 @@ from tensorflow import keras
 from tensorflow.keras import * 
 from mirnet import get_enchancement_model
 import argparse
-from utils import charbonnier_loss, CharBonnierLoss, psnr_enchancement, PSNR
+from utils import charbonnier_loss, CharBonnierLoss, psnr_enchancement, PSNR, l2_loss
 from dataloaders import LOLDataLoader
 from custom_trainer import Trainer
 import os

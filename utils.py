@@ -62,3 +62,13 @@ def psnr_denoising(y_true, y_pred):
 
 def psnr_sr(y_true, y_pred):
     return tf.image.psnr(y_pred, y_true, max_val=255.0)
+
+def l2_loss(y_true, y_pred):
+    squared_difference = tf.square(y_true - y_pred) +  tf.square(1e-3)
+    return tf.sqrt(tf.reduce_mean(squared_difference, axis=-1))
+
+
+class LossFunctionNotExists(Exception):
+    def __init__(self, message):
+        super().__init__()
+        self.message = message
