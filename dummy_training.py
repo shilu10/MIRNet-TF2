@@ -1,16 +1,14 @@
 import tensorflow as tf 
 from tensorflow import keras 
 from tensorflow.keras import * 
-from .mirnet.models import get_enchancement_model
+from mirnet.models import get_enchancement_model
 import argparse
-from .utils import charbonnier_loss, CharBonnierLoss, psnr_enchancement, PSNR
-from .dataloaders.lol_dataloader import LOLDataLoader
-from .custom_trainer import Trainer
+from utils import charbonnier_loss, CharBonnierLoss, psnr_enchancement, PSNR, l2_loss, LossFunctionNotExists
+from dataloaders.lol_dataloader import LOLDataLoader
+from custom_trainer import Trainer
 import os
 import shutil, glob 
 import sys 
-
-
 
 
 def train(gpu, 
@@ -22,7 +20,8 @@ def train(gpu,
       store_model_summary, 
       checkpoint_filepath, 
       loss_function, 
-      use_custom_trainer):
+      use_custom_trainer,
+      epochs):
 
 
     os.environ['CUDA_VISIBLE_DEVICES'] = gpu
@@ -81,10 +80,13 @@ def train(gpu,
         loss_func = charbonnier_loss
 
     if loss_function == "l1":
-        loss_func = tf.keras.metrics.MeanAbsoluteError()
+        loss_func = tf.keras.losses.MeanAbsoluteError()
 
+    if loss_function == "l2":
+        loss_func = tf.keras.losses.MeanSquaredError()
+    
     else:
-        loss_func = tf.keras.metrics.MeanSquaredError()
+        raise LossFunctionNotExists("given loss function is not supported")
 
     if use_custom_trainer:
         checkpoint = tf.train.Checkpoint(
@@ -107,7 +109,7 @@ def train(gpu,
                     optimizer=optimizer,
                     ckpt=checkpoint,
                     ckpt_manager=manager,
-                    epochs=1
+                    epochs=epochs
                 )
 
         trainer.train(train_ds, val_ds)
@@ -122,7 +124,7 @@ def train(gpu,
         model.fit(
                 train_ds,
                 validation_data=val_ds,
-                epochs=1,
+                epochs=epochs,
                 callbacks=[early_stopping_callback, model_checkpoint_callback, reduce_lr_loss]
             )
 
