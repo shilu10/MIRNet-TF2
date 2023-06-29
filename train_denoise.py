@@ -44,8 +44,6 @@ def train():
                     transform=False
                 )
 
-    val_ds = None
-
     model = get_denoising_model(
             num_rrg=args.num_rrg,
             num_mrb=args.num_mrb,
@@ -132,7 +130,6 @@ def train():
                 epochs=args.n_epochs,
                 callbacks=[early_stopping_callback, model_checkpoint_callback, reduce_lr_loss]
             )
-    
 
 
 if __name__ == '__main__':
