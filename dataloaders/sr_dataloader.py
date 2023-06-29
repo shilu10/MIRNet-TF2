@@ -81,8 +81,9 @@ class SRDataLoader:
 
         ds = self._images_dataset(self._hr_image_files()).cache(self._hr_cache_file())
 
-        if not os.path.exists(self._hr_cache_index()):
-            self._populate_cache(ds, self._hr_cache_file())
+        # creating a cache.
+        # if not os.path.exists(self._hr_cache_index()):
+        #    self._populate_cache(ds, self._hr_cache_file())
 
         return ds
 
@@ -92,8 +93,9 @@ class SRDataLoader:
 
         ds = self._images_dataset(self._lr_image_files()).cache(self._lr_cache_file())
 
-        if not os.path.exists(self._lr_cache_index()):
-            self._populate_cache(ds, self._lr_cache_file())
+        # creating a cache.
+        # if not os.path.exists(self._lr_cache_index()):
+        #    self._populate_cache(ds, self._lr_cache_file())
 
         return ds
 
