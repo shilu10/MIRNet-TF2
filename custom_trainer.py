@@ -111,27 +111,27 @@ class Trainer:
                 train_loss = train_result["loss"].numpy()
                 train_psnr = train_result["psnr"].numpy()
 
-            for step, val_batch in enumerate(val_ds):
-                val_result = self.test_step(val_batch)
-                val_loss = val_result["loss"].numpy()
-                val_psnr = val_result['psnr'].numpy()
+          #  for step, val_batch in enumerate(val_ds):
+           #     val_result = self.test_step(val_batch)
+            #    val_loss = val_result["loss"].numpy()
+            #    val_psnr = val_result['psnr'].numpy()
         
             self.ckpt.epoch.assign_add(1)
             history["train_loss"].append(train_loss) 
-            history["val_loss"].append(val_loss)
+            #history["val_loss"].append(val_loss)
             
 
             with self.train_writer.as_default(step=epoch):
                 tf.summary.scalar('train_loss', train_loss)
                 tf.summary.scalar('train_psnr', train_psnr)
 
-            with self.val_writer.as_default(step=epoch):
-                tf.summary.scalar('val_loss', val_loss)
-                tf.summary.scalar('train_psnr', val_psnr)
+            #with self.val_writer.as_default(step=epoch):
+             #   tf.summary.scalar('val_loss', val_loss)
+              #  tf.summary.scalar('train_psnr', val_psnr)
             
 
             print(f'train_loss: {train_loss}, train_psnr: {train_psnr} \n')
-            print(f'val_loss: {val_loss}, val_psnr: {val_psnr}  \n')
+           # print(f'val_loss: {val_loss}, val_psnr: {val_psnr}  \n')
             
             #reset states of training step
             self.loss_tracker.reset_states()
