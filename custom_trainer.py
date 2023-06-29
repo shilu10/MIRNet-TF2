@@ -91,7 +91,7 @@ class Trainer:
         pass 
     
     def save_weights(self, filepath):
-        fname = "enhancement_model"
+        fname = "enhancement_model.h5"
         filepath = filepath + fname
         self.model.save_weights(fname)
 
