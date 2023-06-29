@@ -86,10 +86,10 @@ def train():
         loss_func = charbonnier_loss
 
     if args.loss_function == "l1":
-        loss_func = tf.keras.metrics.MeanAbsoluteError()
+        loss_func = tf.keras.losses.MeanAbsoluteError()
 
     else:
-        loss_func = tf.keras.metrics.MeanSquaredError()
+        loss_func = tf.keras.losses.MeanSquaredError()
 
     if args.use_custom_trainer:
         checkpoint = tf.train.Checkpoint(
