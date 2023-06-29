@@ -107,7 +107,7 @@ def train():
         trainer = Trainer(
                     model=model,
                     loss_func=loss_func,
-                    metric_func=psnr_enchancement,
+                    metric_func=psnr_denoising,
                     optimizer=optimizer,
                     ckpt=checkpoint,
                     ckpt_manager=manager,
