@@ -38,11 +38,13 @@ def train():
                     transform=True
                 )
 
-    val_ds = dataloader.get_dataset(
-                    subset="val",
-                    batch_size=args.batch_size,
-                    transform=False
-                )
+    #val_ds = dataloader.get_dataset(
+     #               subset="val",
+      #              batch_size=args.batch_size,
+       #             transform=False
+        #        )
+
+    val_ds = None
 
     model = get_denoising_model(
             num_rrg=args.num_rrg,
