@@ -120,7 +120,7 @@ def train():
                     optimizer=optimizer,
                     ckpt=checkpoint,
                     ckpt_manager=manager,
-                    epochs=args.epcohs
+                    epochs=args.n_epochs
                 )
 
         trainer.train(train_ds, val_ds)
