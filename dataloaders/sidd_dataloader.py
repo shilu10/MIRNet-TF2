@@ -156,16 +156,17 @@ class SIDDDataLoader:
         return lr_img, hr_img
 
     def __create_tf_dataset(self, tf_ds, batch_size, transform):
+        
         if transform:
-           
             tf_ds = tf_ds.map(lambda lr, hr: random_crop(lr, hr), num_parallel_calls=tf.data.AUTOTUNE)
             tf_ds = tf_ds.map(random_flip, num_parallel_calls=tf.data.AUTOTUNE)
             tf_ds = tf_ds.map(random_rotate, num_parallel_calls=tf.data.AUTOTUNE)
+            tf_ds = tf_ds.batch(batch_size, drop_remainder=False)
 
         if not transform:
             tf_ds = tf_ds.map(lambda lr, hr: self.image_resize(lr, hr), num_parallel_calls=tf.data.AUTOTUNE)
-
-        tf_ds = tf_ds.batch(1, drop_remainder=False)
+            tf_ds = tf_ds.batch(1, drop_remainder=False)
+        
         tf_ds = tf_ds.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
         
         return tf_ds
