@@ -38,7 +38,6 @@ def train():
     train_ds = train_loader.dataset(
             batch_size=args.batch_size,        
             random_transform=True, 
-            repeat_count=None
         )  
 
     val_loader = SRDataLoader(
@@ -50,7 +49,6 @@ def train():
     val_ds = val_loader.dataset(
             batch_size=args.batch_size,        
             random_transform=False, 
-            repeat_count=None
         )  
 
     model = get_super_resolution_model(
