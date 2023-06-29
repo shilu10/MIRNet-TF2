@@ -116,7 +116,7 @@ def train():
         trainer = Trainer(
                     model=model,
                     loss_func=loss_func,
-                    metric_func=psnr_enchancement,
+                    metric_func=psnr_sr,
                     optimizer=optimizer,
                     ckpt=checkpoint,
                     ckpt_manager=manager,
@@ -129,7 +129,7 @@ def train():
         model.compile(
                 optimizer=optimizer,
                 loss=loss_func,
-                metrics=[psnr_enchancement]
+                metrics=[psnr_sr]
             )
 
         model.fit(
