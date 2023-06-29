@@ -121,7 +121,6 @@ class SIDDDataLoader:
                     os.system(f'rm smartphone-image-denoising-dataset.zip')
                     
         except Exception as err:
-            print(err, "rr")
             return err 
         
     def __read_img(self, img_fpath): 
@@ -188,5 +187,4 @@ class SIDDDataLoader:
                 return tf_ds
                 
         except Exception as err:
-            print(err)
             raise InitializationErro('DataLoader, has not been initialize, use .initalize method')

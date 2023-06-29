@@ -69,7 +69,6 @@ class LOLDataLoader:
         try: 
             lr_train_files, _ = self.__lr_image_files()
             hr_train_files, _ = self.__hr_image_files()
-            print(lr_train_files[:4])
             tf_dataset = tf.data.Dataset.from_tensor_slices((lr_train_files, hr_train_files)) 
             return tf_dataset
         
@@ -122,7 +121,6 @@ class LOLDataLoader:
         
     def __create_tf_dataset(self, tf_ds, batch_size, transform):
         if transform:
-            print("ing")
            
             tf_ds = tf_ds.map(lambda lr, hr: random_crop(lr, hr), num_parallel_calls=tf.data.AUTOTUNE)
             tf_ds = tf_ds.map(random_flip, num_parallel_calls=tf.data.AUTOTUNE)
@@ -149,5 +147,4 @@ class LOLDataLoader:
                 return tf_ds
                 
         except Exception as err:
-            print(err)
             raise InitializationErro('DataLoader, has not been initialize, use .initalize method')

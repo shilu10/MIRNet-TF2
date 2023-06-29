@@ -130,6 +130,9 @@ def train():
                 epochs=args.n_epochs,
                 callbacks=[early_stopping_callback, model_checkpoint_callback, reduce_lr_loss]
             )
+        
+        # Model Serialization
+        model.save_weights("enhancement.h5")
 
 if __name__ == '__main__':
     train()
