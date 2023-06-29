@@ -140,8 +140,8 @@ class SIDDDataLoader:
             hr_img = self.__read_img(hr_img_path)
 
             # resizing
-            lr_img = tf.image.resize(lr_img, (224, 224))
-            hr_img = tf.image.resize(hr_img, (224, 224))
+           # lr_img = tf.image.resize(lr_img, (224, 224))
+           # hr_img = tf.image.resize(hr_img, (224, 224))
 
             return lr_img, hr_img
         
@@ -155,7 +155,7 @@ class SIDDDataLoader:
             tf_ds = tf_ds.map(random_flip, num_parallel_calls=tf.data.AUTOTUNE)
             tf_ds = tf_ds.map(random_rotate, num_parallel_calls=tf.data.AUTOTUNE)
 
-            tf_ds = tf_ds.batch(batch_size, drop_remainder=True)
+        tf_ds = tf_ds.batch(batch_size, drop_remainder=False)
         tf_ds = tf_ds.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
         
         return tf_ds
