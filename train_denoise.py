@@ -14,7 +14,7 @@ import sys
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--lr', type=float, default=1e-4)
-parser.add_argument('--loss_function', type=str, default="l1")
+parser.add_argument('--loss_function', type=str, default="l2")
 parser.add_argument('--n_epochs', type=int, default=200)
 parser.add_argument('--batch_size', type=int, default=32)
 parser.add_argument('--checkpoint_filepath', type=str, default="checkpoint/saved/denoise/")

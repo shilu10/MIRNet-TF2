@@ -39,14 +39,15 @@ def main():
             num_channels=args.num_channels
         )
 
-    trained_model = load_model(args.saved_model_path, custom_objects={'tf': tf})
-    weights = trained_model.get_weights()
+    model.load_weights(args.saved_model_path)
+    # trained_model = load_model(args.saved_model_path, custom_objects={'tf': tf})
+    # weights = trained_model.get_weights()
 
-    model.set_weights(weights)
+    # model.set_weights(weights)
 
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
 
-    if args.optimize
+    if args.optimize:
         converter.optimizations = [tf.lite.Optimize.DEFAULT]
 
     tflite_model = converter.convert()
