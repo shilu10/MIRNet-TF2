@@ -58,7 +58,7 @@ def psnr_enchancement(y_true, y_pred):
     return tf.image.psnr(y_pred, y_true, max_val=255.0)
 
 def psnr_denoising(y_true, y_pred):
-    return tf.image.psnr(y_pred, y_true, max_val=255.0)
+    return tf.image.psnr(y_pred, y_true, max_val=1.0)
 
 def psnr_sr(y_true, y_pred):
     return tf.image.psnr(y_pred, y_true, max_val=255.0)
