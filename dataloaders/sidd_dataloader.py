@@ -148,7 +148,7 @@ class SIDDDataLoader:
         except Exception as err:
             return err
     
-    def image_resize(lr_img, hr_img):
+    def image_resize(self, lr_img, hr_img):
         # resizing
         lr_img = tf.image.resize(lr_img, (128, 128))
         hr_img = tf.image.resize(hr_img, (128, 128))
@@ -163,7 +163,7 @@ class SIDDDataLoader:
             tf_ds = tf_ds.map(random_rotate, num_parallel_calls=tf.data.AUTOTUNE)
 
         if not transform:
-            tf_ds = tf_ds.map(lambda lr, hr: image_resize(lr, hr), num_parallel_calls=tf.data.AUTOTUNE)
+            tf_ds = tf_ds.map(lambda lr, hr: self.image_resize(lr, hr), num_parallel_calls=tf.data.AUTOTUNE)
 
         tf_ds = tf_ds.batch(1, drop_remainder=False)
         tf_ds = tf_ds.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
