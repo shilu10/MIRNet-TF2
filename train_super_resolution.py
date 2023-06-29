@@ -24,6 +24,7 @@ parser.add_argument('--summary', type=bool, default=False)
 parser.add_argument('--store_model_summary', type=bool, default=False)
 parser.add_argument('--scale_factor', type=int, default=4)
 parser.add_argument('--downgrade', type=str, default="bicubic")
+parser.add_argument('--use_custom_trainer', type=bool, default=False)
 
 args = parser.parse_args()
 
