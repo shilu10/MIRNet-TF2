@@ -54,6 +54,5 @@ def main():
         f.write(tflite_model)
 
 
-
 if __name__ == '__main__':
     main()
