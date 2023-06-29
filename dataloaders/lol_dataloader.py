@@ -138,13 +138,13 @@ class LOLDataLoader:
         try:
             if subset == "train":
                 tf_ds = self.__train_tf_dataset()
-                tf_ds = tf_ds.map(self.__load_data, num_parallel_calls=tf.data.AUTOTUNE).cache()
+                tf_ds = tf_ds.map(self.__load_data, num_parallel_calls=tf.data.AUTOTUNE)
                 tf_ds = self.__create_tf_dataset(tf_ds, batch_size, transform)
                 return tf_ds
             
             else:
                 tf_ds = self.__val_tf_dataset()
-                tf_ds = tf_ds.map(self.__load_data, num_parallel_calls=tf.data.AUTOTUNE).cache()
+                tf_ds = tf_ds.map(self.__load_data, num_parallel_calls=tf.data.AUTOTUNE)
                 tf_ds = self.__create_tf_dataset(tf_ds, batch_size, transform)
                 return tf_ds
                 
