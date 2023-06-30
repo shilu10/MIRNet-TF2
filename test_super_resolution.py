@@ -1,3 +1,9 @@
+# Hight Resolution image shape is 96
+
+# supressing tensorflow warning, info, or things.
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 import tensorflow as tf 
 from tensorflow import keras 
 from tensorflow.keras import * 
@@ -7,16 +13,18 @@ from PIL import Image
 import PIL 
 import numpy as np 
 from imutils import paths 
-from glob import glob 
 from mirnet import get_super_resolution_model
 import argparse
 from tensorflow.keras.preprocessing.image import img_to_array
-
+from utils import get_lowres_image
+import time, glob 
+import tdqm 
+import matplotlib.pyplot as plt 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--test_path', type=str, default="test/super_resolution")
+parser.add_argument('--test_path', type=str, default="test/super_resolution/")
 parser.add_argument('--plot_results', type=bool, default=False)
-parser.add_argument('--checkpoint_filepath', type=str, default="checkpoint/saved/super_resolution/")
+parser.add_argument('--checkpoint_filepath', type=str, default="checkpoint/super_resolution/")
 parser.add_argument('--num_rrg', type=int, default=3)
 parser.add_argument('--num_mrb', type=int, default=2)
 parser.add_argument('--num_channels', type=int, default=64)
@@ -24,14 +32,16 @@ parser.add_argument('--scale_factor', type=int, default=4)
 parser.add_argument('--summary', type=bool, default=False)
 parser.add_argument('--store_model_summary', type=bool, default=False)
 parser.add_argument('--file_extension', type=str, default='png')
+parser.add_argument('--mode', type=str, default="super_resolution")
 
 args = parser.parse_args()
 
 def test(model):
 
     lowlight_test_images_path = args.test_path
-
-    for test_file in glob.glob(lowlight_test_images_path + f"*.{args.file_extension}"):
+    test_files = glob.glob(lowlight_test_images_path + f"*.{args.file_extension}")
+    
+    for test_file in tqdm.tqdm(test_files, total=len(test_files)):
         filename = test_file.split("/")[-1]
         data_lowlight_path = test_file
         original_img = Image.open(data_lowlight_path)
@@ -63,7 +73,7 @@ def test(model):
         
         save_file_dir = lowlight_test_images_path.replace('test', 'results')
         save_file_path = save_file_dir + "/" + filename
-        enhanced_image.save(fsave_file_path)
+        enhanced_image.save(save_file_path)
 
 
 if __name__ == '__main__':
@@ -74,7 +84,7 @@ if __name__ == '__main__':
             scale_factor=args.scale_factor
         )
 
-    model.load_weights(args.checkpoint_filepath + '/best_model.h5')
+    model.load_weights(args.checkpoint_filepath + 'best_model.h5')
 
     if args.summary:
         model.summary()

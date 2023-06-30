@@ -5,7 +5,7 @@ from tensorflow.keras import *
 from .mir_backbone import MIRNet
 from tensorflow.keras.layers import *
 
-def get_enchancement_model(num_rrg: int, num_mrb: int, num_channels: int)->keras.Model: 
+def get_enhancement_model(num_rrg: int, num_mrb: int, num_channels: int)->keras.Model: 
     """
         this function, will creaate a low light enchancement model with MIRNET as a 
         backbone model.

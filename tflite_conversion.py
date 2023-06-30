@@ -1,3 +1,9 @@
+# # Hight Resolution image shape is 96
+
+# supressing tensorflow warning, info, or things.
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 import tensorflow as tf 
 from tensorflow.keras.models import load_model
 import argparse
@@ -6,12 +12,12 @@ from mirnet import get_enchancement_model, get_denoising_model, get_super_resolu
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--scale_factor', type=int, default=4)
-parser.add_argument('--saved_model_path', type=str, default="checkpoint/saved/super_resolution/best_model.h5")
-parser.add_argument('--tflite_model_path', type=str, default='checkpoint/saved/super_resolution/best_model.tflite')
+parser.add_argument('--saved_model_path', type=str, default="checkpoint/super_resolution/best_model.h5")
+parser.add_argument('--tflite_model_path', type=str, default='checkpoint/super_resolution/best_model.tflite')
 parser.add_argument('--mode', type=str, default='super_resolution')
-parser.add_argument('--num_rrg', type=str, default='super_resolution')
-parser.add_argument('--num_mrb', type=str, default='super_resolution')
-parser.add_argument('--num_channels', type=str, default='super_resolution')
+parser.add_argument('--num_rrg', type=int, default=3)
+parser.add_argument('--num_mrb', type=int, default=1)
+parser.add_argument('--num_channels', type=int, default=64)
 parser.add_argument('--optimize', type=bool, default=False)
 
 args = parser.parse_args()
@@ -25,7 +31,7 @@ def main():
             scale_factor=args.scale_factor
         )
 
-    if args.model == "denoise":
+    if args.mode == "denoise":
         model = get_denoising_model(
             num_rrg=args.num_rrg,
             num_mrb=args.num_mrb,
@@ -40,9 +46,9 @@ def main():
         )
 
     model.load_weights(args.saved_model_path)
+
     # trained_model = load_model(args.saved_model_path, custom_objects={'tf': tf})
     # weights = trained_model.get_weights()
-
     # model.set_weights(weights)
 
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
@@ -54,6 +60,7 @@ def main():
     with open(args.tflite_model_path, 'wb') as f:
         f.write(tflite_model)
 
+    print("Tflite model is saved at: ", args.tflite_model_path)
 
 if __name__ == '__main__':
     main()
