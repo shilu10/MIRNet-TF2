@@ -1,3 +1,7 @@
+# supressing tensorflow warning, info, or things.
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 import tensorflow as tf 
 from tensorflow import keras 
 from tensorflow.keras import *
@@ -7,14 +11,14 @@ from collections import *
 from tqdm import tqdm
 
 
-
 class Trainer:
-    def __init__(self, model, loss_func, metric_func, optimizer, ckpt, ckpt_manager, epochs):
+    def __init__(self, model, loss_func, metric_func, optimizer, ckpt, ckpt_manager, epochs, mode):
         self.model = model 
         self.ckpt = ckpt
         self.ckpt_manager = ckpt_manager
         self.epochs = epochs
         self.optimizer = optimizer
+        self.mode = mode
         self.loss_func = loss_func
         self.metric_func = metric_func
 
@@ -90,12 +94,19 @@ class Trainer:
     def load_weights(self, filepath):
         pass 
     
-    def save_weights(self, filepath):
-        fname = "enhancement_model.h5"
-        filepath = filepath + fname
-        self.model.save_weights(fname)
+    def save_weights(self):
+        if self.mode == "enhancement":
+            fpath = "pretrained_weights/enhancement/best_model.h5"
+        
+        if self.mode == "denoise":
+            fpath = "pretrained_weights/denoise/best_model.h5"
 
-        print("Model Serialized successfully..")
+        else:
+            fpath = "pretrained_weights/super_resolution/best_model.h5"
+
+        self.model.save_weights(fpath)
+
+        print("Model Serialized at: ", fpath)
     
     def train(self, train_ds, val_ds):
         history = defaultdict(list)
@@ -148,9 +159,7 @@ class Trainer:
                 
                 print("Saved checkpoint for step {}: {}".format(int(self.ckpt.epoch), save_path))
             
-        self.save_weights(".")
-
-        return self.model
+        self.save_weights()
     
     def compute_psnr(self):
         pass 

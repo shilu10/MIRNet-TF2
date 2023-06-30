@@ -1,3 +1,7 @@
+# supressing tensorflow warning, info, or things.
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 import tensorflow as tf 
 from tensorflow import keras 
 from tensorflow.keras import * 
@@ -6,7 +10,6 @@ import argparse
 from utils import charbonnier_loss, CharBonnierLoss, psnr_denoising, PSNR
 from dataloaders import SIDDDataLoader
 from custom_trainer import Trainer
-import os
 import shutil, glob 
 import sys 
 
@@ -17,7 +20,7 @@ parser.add_argument('--lr', type=float, default=1e-4)
 parser.add_argument('--loss_function', type=str, default="l2")
 parser.add_argument('--n_epochs', type=int, default=200)
 parser.add_argument('--batch_size', type=int, default=32)
-parser.add_argument('--checkpoint_filepath', type=str, default="checkpoint/saved/denoise/")
+parser.add_argument('--checkpoint_filepath', type=str, default="checkpoint/denoise/")
 parser.add_argument('--num_rrg', type=int, default=3)
 parser.add_argument('--num_mrb', type=int, default=2)
 parser.add_argument('--num_channels', type=int, default=64)
@@ -65,7 +68,7 @@ def train():
         )
 
     model_checkpoint_callback = keras.callbacks.ModelCheckpoint(
-            args.checkpoint_filepath+"/best_model.h5",
+            args.checkpoint_filepath + "best_model.h5",
             save_weights_only=True,
             monitor="val_psnr_denoising",
             mode="max",
@@ -100,7 +103,7 @@ def train():
 
         manager = tf.train.CheckpointManager(
             checkpoint,
-            directory=args.checkpoint_filepath,
+            directory=args.checkpoint_filepath + "custom_training/",
             max_to_keep=5
         )
 
@@ -112,12 +115,12 @@ def train():
                     optimizer=optimizer,
                     ckpt=checkpoint,
                     ckpt_manager=manager,
-                    epochs=args.n_epochs
+                    epochs=args.n_epochs,
+                    mode="denoise"
                 )
 
         trainer.train(train_ds, val_ds)
         
-    
     else: 
         model.compile(
                 optimizer=optimizer,

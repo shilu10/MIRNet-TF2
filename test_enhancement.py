@@ -1,3 +1,7 @@
+# supressing tensorflow warning, info, or things.
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 import tensorflow as tf 
 from tensorflow import keras 
 from tensorflow.keras import * 
@@ -7,33 +11,38 @@ from PIL import Image
 import PIL 
 import numpy as np 
 from imutils import paths 
-from glob import glob 
-from mirnet import get_enchancement_model
+from mirnet import get_enhancement_model
 import argparse
 from tensorflow.keras.preprocessing.image import img_to_array
-
+from utils import get_lowres_image
+import time, glob
+import tdqm 
+import matplotlib.pyplot as plt 
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--test_path', type=str, default="test/LIME")
+parser.add_argument('--test_path', type=str, default="test/LIME/")
 parser.add_argument('--plot_results', type=bool, default=False)
-parser.add_argument('--checkpoint_filepath', type=str, default="checkpoint/saved/enchancement/")
+parser.add_argument('--checkpoint_filepath', type=str, default="checkpoint/enhancement/")
 parser.add_argument('--num_rrg', type=int, default=3)
 parser.add_argument('--num_mrb', type=int, default=2)
 parser.add_argument('--num_channels', type=int, default=64)
 parser.add_argument('--summary', type=bool, default=False)
 parser.add_argument('--store_model_summary', type=bool, default=False)
 parser.add_argument('--file_extension', type=str, default='bmp')
+parser.add_argument('--mode', type=str, default="enhancement")
 
 args = parser.parse_args()
 
 def test(model):
 
     lowlight_test_images_path = args.test_path
+    test_files = glob.glob(lowlight_test_images_path + f"*.{args.file_extension}")
 
-    for test_file in glob.glob(lowlight_test_images_path + f"*.{args.file_extension}"):
+    for test_file in tqdm.tqdm(test_files, total=len(test_files)):
         filename = test_file.split("/")[-1]
         data_lowlight_path = test_file
+
         original_img = Image.open(data_lowlight_path)
         original_size = (np.array(original_img).shape[1], np.array(original_img).shape[0])
         original_img = cv2.resize(original_img, (256, 256))
@@ -63,7 +72,7 @@ def test(model):
         
         save_file_dir = lowlight_test_images_path.replace('test', 'results')
         save_file_path = save_file_dir + "/" + filename
-        enhanced_image.save(fsave_file_path)
+        enhanced_image.save(save_file_path)
 
 
 if __name__ == '__main__':
@@ -73,12 +82,12 @@ if __name__ == '__main__':
         num_channels=args.num_channels
     )
     
-    model.load_weights(args.checkpoint_filepath + '/best_model.h5')
+    model.load_weights(args.checkpoint_filepath + 'best_model.h5')
 
     if args.summary:
         model.summary()
 
     if args.store_model_summary:
-        tf.keras.utils.plot_model(to_file="mirnet_enchancement.png")
+        tf.keras.utils.plot_model(to_file="mirnet_enhancement.png")
 
     test(model)
