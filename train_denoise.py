@@ -66,6 +66,7 @@ def train():
 
     model_checkpoint_callback = keras.callbacks.ModelCheckpoint(
             args.checkpoint_filepath+"/best_model.h5",
+            save_weights_only=True,
             monitor="val_psnr_denoising",
             mode="max",
             save_best_only=True,
