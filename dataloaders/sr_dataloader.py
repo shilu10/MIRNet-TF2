@@ -1,3 +1,4 @@
+
 # Reference: https://github.com/krasserm/super-resolution/blob/master/data.py
 import gdown 
 import os 
@@ -10,10 +11,10 @@ from tensorflow import keras
 import tensorflow as tf 
 from tensorflow.keras import *
 from tensorflow.python.data.experimental import AUTOTUNE
-from .utils import random_crop, random_crop_sr, random_flip, random_rotate
+from dataloaders.utils import random_crop, random_crop_sr, random_flip, random_rotate
 
 
-class SRDataLoader:
+class SRDataLoader1:
     def __init__(self,
                  scale=2,
                  subset='train',
@@ -70,9 +71,14 @@ class SRDataLoader:
             ds = ds.map(lambda lr, hr: random_crop_sr(lr, hr, scale=self.scale), num_parallel_calls=AUTOTUNE)
             ds = ds.map(random_rotate, num_parallel_calls=AUTOTUNE)
             ds = ds.map(random_flip, num_parallel_calls=AUTOTUNE)
+            ds = ds.map(lambda lr, hr: (tf.image.convert_image_dtype(lr, tf.float32), tf.image.convert_image_dtype(hr, tf.float32)))
         
+        if not random_transform:
+            ds = ds.map(lambda lr, hr: random_crop_sr(lr, hr, scale=self.scale), num_parallel_calls=AUTOTUNE)
+            ds = ds.map(lambda lr, hr: (tf.image.convert_image_dtype(lr, tf.float32), tf.image.convert_image_dtype(hr, tf.float32)))
+            
         ds = ds.batch(batch_size)
-       # ds = ds.repeat(repeat_count)
+        # ds = ds.repeat(repeat_count)
         ds = ds.prefetch(buffer_size=AUTOTUNE)
         return ds
 
@@ -149,6 +155,7 @@ class SRDataLoader:
         ds = tf.data.Dataset.from_tensor_slices(image_files)
         ds = ds.map(tf.io.read_file)
         ds = ds.map(lambda x: tf.image.decode_png(x, channels=3), num_parallel_calls=AUTOTUNE)
+     #   ds = ds.map(lambda x: tf.image.convert_image_dtype(x, dtype=tf.float32))
         return ds
 
     @staticmethod

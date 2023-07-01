@@ -73,14 +73,15 @@ def test():
         lr_img_shape = lr_img.shape
         inferrer_input_dims = (1, lr_img_shape[0], lr_img_shape[1], lr_img_shape[2])
         enhanced_image = inferrer(inputs, inferrer_input_dims)
+        enhanced_image = enhanced_image[0]
         print("Time taken for inference: ", time.time() - t)
 
         if args.plot_results:
             plt.figure()
-            plt.subplot(131)
-            plt.imshow(original_img)
+            plt.subplot(121)
+            plt.imshow(lr_img)
             
-            plt.subplot(132)
+            plt.subplot(122)
             plt.imshow(enhanced_image)
             
             plt.show()
