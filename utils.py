@@ -55,24 +55,29 @@ def charbonnier_loss(y_true, y_pred):
     return tf.reduce_mean(tf.sqrt(tf.square(y_true - y_pred) + tf.square(1e-3)))
 
 def psnr_enhancement(y_true, y_pred):
-    return tf.image.psnr(y_pred, y_true, max_val=255.0)
+    return tf.image.psnr(y_pred, y_true, max_val=1.0)
 
 def psnr_denoising(y_true, y_pred):
     return tf.image.psnr(y_pred, y_true, max_val=1.0)
 
 def psnr_sr(y_true, y_pred):
-    return tf.image.psnr(y_pred, y_true, max_val=255.0)
+    return tf.image.psnr(y_pred, y_true, max_val=1.0)
 
 def l2_loss(y_true, y_pred):
     squared_difference = tf.square(y_true - y_pred) +  tf.square(1e-3)
     return tf.sqrt(tf.reduce_mean(squared_difference, axis=-1))
 
-def get_lowres_image(img, mode="enhancement"):
+def get_lowres_image(img, mode="enhancement", scale_factor=4):
+    
     if mode == "denoise":
-        img = cv2.resize(img, (1024, 720))
+        img = cv2.resize(img, (512, 360))
+    
+    if mode == "super_resolution":
+        img = cv2.resize(img, (400, 260))
+        
     else:
         img = img 
-        
+    
     return img
 
 class LossFunctionNotExists(Exception):

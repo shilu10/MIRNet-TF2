@@ -40,39 +40,35 @@ def test(model):
     test_files = glob.glob(lowlight_test_images_path + f"*.{args.file_extension}")
 
     for test_file in tqdm.tqdm(test_files, total=len(test_files)):
-        filename = test_file.split("/")[-1]
-        data_lowlight_path = test_file
-
-        original_img = Image.open(data_lowlight_path)
-        original_size = (np.array(original_img).shape[1], np.array(original_img).shape[0])
-        original_img = cv2.resize(original_img, (256, 256))
-
-        img_lowlight = cv2.imread(data_lowlight_path)
-        img_lowlight = cv2.resize(img_lowlight, (256, 256))
         
-        y = img_to_array(img_lowlight)
-        inputs = np.expand_dims(y, axis=0)
+        filename = test_file.split("/")[-1]
+        lr_img = cv2.imread(test_file)
+        lr_img = cv2.cvtColor(lr_img, cv2.COLOR_BGR2RGB)
+        
+        # for resizing specific model data to specific dim.
+        lr_img = get_lowres_image(lr_img, mode=args.mode)
+
+        inputs = img_to_array(img_lowlight)
+        inputs = np.expand_dims(inputs, axis=0)
         t = time.time()
-        out = model.predict(inputs, verbose=False)
-        print(time.time() - t)
 
-        out_img_y = out[0]
-        out_img_y = out_img_y.clip(0, 255)
-        out_img_y = out_img_y.reshape((np.shape(out_img_y)[0], np.shape(out_img_y)[1], 3))
-
-        enhanced_image = PIL.Image.fromarray(np.uint8(out_img_y))
+        enhanced_image = model.predict(inputs, verbose=False)
+        enhanced_image = enhanced_image[0]
+        print("Time taken for inference: ", time.time() - t)
 
         if args.plot_results:
             plt.figure()
             plt.subplot(121)
-            plt.imshow(original_img/255.0)
+            plt.imshow(original_img)
             
             plt.subplot(122)
-            plt.imshow(enhanced_image/255.0)
+            plt.imshow(enhanced_image)
+
+            plt.show()
         
         save_file_dir = lowlight_test_images_path.replace('test', 'results')
-        save_file_path = save_file_dir + "/" + filename
-        enhanced_image.save(save_file_path)
+        save_file_path = save_file_dir + filename
+        cv2.imwrite(save_file_path, cv2.cvtColor(enhanced_image, cv2.COLOR_BGR2RGB))
 
 
 if __name__ == '__main__':
