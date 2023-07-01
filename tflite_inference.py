@@ -49,7 +49,7 @@ def inferrer(image, input_dims=(1, 400, 600, 3)):
     # output_image = (np.squeeze(output, axis=0).clip(0, 1) * 255).astype(np.uint8)
     # img = Image.fromarray(output_image)
     
-    return output[0]
+    return output
 
 
 def test():

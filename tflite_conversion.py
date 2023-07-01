@@ -7,7 +7,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf 
 from tensorflow.keras.models import load_model
 import argparse
-from mirnet import get_enchancement_model, get_denoising_model, get_super_resolution_model
+from mirnet import get_enhancement_model, get_denoising_model, get_super_resolution_model
 
 parser = argparse.ArgumentParser()
 
@@ -39,7 +39,7 @@ def main():
         )
 
     else:
-        model = get_enchancement_model(
+        model = get_enhancement_model(
             num_rrg=args.num_rrg,
             num_mrb=args.num_mrb,
             num_channels=args.num_channels

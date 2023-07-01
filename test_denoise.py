@@ -41,6 +41,7 @@ def test(model):
     test_files = glob.glob(lowlight_test_images_path + f"*.{args.file_extension}")
 
     for test_file in tqdm.tqdm(test_files, total=len(test_files)):
+        
         filename = test_file.split("/")[-1]
         data_lowlight_path = test_file
         original_img = Image.open(data_lowlight_path)
