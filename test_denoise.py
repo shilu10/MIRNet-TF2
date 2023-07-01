@@ -66,10 +66,10 @@ def test(model):
         if args.plot_results:
             plt.figure()
             plt.subplot(121)
-            plt.imshow(original_img/255.0)
+            plt.imshow(lr_img)
             
             plt.subplot(122)
-            plt.imshow(enhanced_image/255.0)
+            plt.imshow(enhanced_image)
         
         save_file_dir = lowlight_test_images_path.replace('test', 'results')
         save_file_path = save_file_dir + "/" + filename

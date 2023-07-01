@@ -62,7 +62,7 @@ def test(model):
             
             plt.figure()
             plt.subplot(121)
-            plt.imshow(original_img)
+            plt.imshow(lr_img)
             
             plt.subplot(122)
             plt.imshow(enhanced_image)

@@ -88,7 +88,8 @@ class LOLDataLoader:
     def initialize(self):
         try: 
             if self.dname == "lol":
-                LOL_DATA_URL = 'https://drive.google.com/uc?id=1DdGIJ4PZPlF2ikl8mNM9V-PdVxVLbQi6'
+                # https://drive.google.com/file/d/10TC19ND0qeqUCG_mvfhtOjmXkSunYyud/view?usp=sharing
+                LOL_DATA_URL = "https://drive.google.com/file/d/10TC19ND0qeqUCG_mvfhtOjmXkSunYyud/view?usp=sharing"
                 if not os.path.exists('lol_dataset'):
                     gdown.download(LOL_DATA_URL, quiet=True)
                     os.system(f'unzip -q lol_dataset')
