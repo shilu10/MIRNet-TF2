@@ -14,7 +14,7 @@ from tensorflow.python.data.experimental import AUTOTUNE
 from dataloaders.utils import random_crop, random_crop_sr, random_flip, random_rotate
 
 
-class SRDataLoader1:
+class SRDataLoader:
     def __init__(self,
                  scale=2,
                  subset='train',
