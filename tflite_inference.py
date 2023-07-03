@@ -24,6 +24,7 @@ parser.add_argument('--result_data_path', type=str, default='results/tflite/LIME
 parser.add_argument('--scale_factor', type=int, default=2)
 parser.add_argument('--mode', type=str, default="super_resolution")
 parser.add_argument('--file_extension', type=str, default='bmp')
+parser.add_argument('--save_path', type=str, default="results/tflite/LIME/")
 
 
 args = parser.parse_args()
@@ -87,8 +88,8 @@ def test():
             plt.show()
         
         
-        save_file_dir = lowlight_test_images_path.replace('test', 'results')
-        save_file_path = save_file_dir  + filename
+        # save_file_dir = lowlight_test_images_path.replace('test', 'results')
+        save_file_path = args.save_path  + filename
         cv2.imwrite(save_file_path, cv2.cvtColor(enhanced_image, cv2.COLOR_BGR2RGB))
 
 

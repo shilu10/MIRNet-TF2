@@ -16,7 +16,7 @@ import argparse
 from tensorflow.keras.preprocessing.image import img_to_array
 from utils import get_lowres_image
 import time, glob
-import tdqm 
+import tqdm 
 import matplotlib.pyplot as plt 
 
 parser = argparse.ArgumentParser()
@@ -31,6 +31,8 @@ parser.add_argument('--summary', type=bool, default=False)
 parser.add_argument('--store_model_summary', type=bool, default=False)
 parser.add_argument('--file_extension', type=str, default='bmp')
 parser.add_argument('--mode', type=str, default="enhancement")
+parser.add_argument('--save_path', type=str, default="results/LIME/")
+
 
 args = parser.parse_args()
 
@@ -66,8 +68,8 @@ def test(model):
 
             plt.show()
         
-        save_file_dir = lowlight_test_images_path.replace('test', 'results')
-        save_file_path = save_file_dir + filename
+        # save_file_dir = lowlight_test_images_path.replace('test', 'results')
+        save_file_path = args.save_path + filename
         cv2.imwrite(save_file_path, cv2.cvtColor(enhanced_image, cv2.COLOR_BGR2RGB))
 
 
