@@ -78,7 +78,7 @@ def get_lowres_image(img, mode="enhancement", scale_factor=4):
         img = cv2.resize(img, (400, 260))
 
     if mode == "enhancement":
-        img = cv2.resize(img, (400, 600))
+        img = cv2.resize(img, (600, 400))
         
     else:
         img = img 
