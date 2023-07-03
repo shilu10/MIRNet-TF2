@@ -31,7 +31,7 @@ args = parser.parse_args()
 
 
 def inferrer(image, input_dims=(1, 400, 600, 3)):
-    interpreter = tf.lite.Interpreter(model_path=tflite_model_path)
+    interpreter = tf.lite.Interpreter(model_path=args.tflite_model_path)
     interpreter.allocate_tensors()
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
