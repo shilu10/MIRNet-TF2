@@ -25,6 +25,7 @@ parser.add_argument('--scale_factor', type=int, default=2)
 parser.add_argument('--mode', type=str, default="super_resolution")
 parser.add_argument('--file_extension', type=str, default='bmp')
 parser.add_argument('--save_path', type=str, default="results/tflite/LIME/")
+parser.add_argument('--plot_results', type=bool, default=False)
 
 
 args = parser.parse_args()
