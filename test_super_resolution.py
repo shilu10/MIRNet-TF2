@@ -52,7 +52,7 @@ def test(model):
         # for resizing specific model data to specific dim.
         lr_img = get_lowres_image(lr_img, mode=args.mode)
 
-        inputs = img_to_array(img_lowlight)
+        inputs = img_to_array(lr_img)
         inputs = np.expand_dims(inputs, axis=0)
         
         t = time.time()
