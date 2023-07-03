@@ -74,7 +74,7 @@ def test(model):
 
 
 if __name__ == '__main__':
-    model = get_enchancement_model(
+    model = get_enhancement_model(
         num_rrg=args.num_rrg,
         num_mrb=args.num_mrb,
         num_channels=args.num_channels
