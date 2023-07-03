@@ -3,6 +3,8 @@ from tensorflow import keras
 import tensorflow as tf 
 from tensorflow.keras import * 
 import os 
+import cv2 
+
 
 def random_crop(lr_img, hr_img, hr_crop_size=128):
     lr_crop_size = hr_crop_size
