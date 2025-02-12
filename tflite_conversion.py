@@ -19,6 +19,8 @@ parser.add_argument('--num_rrg', type=int, default=3)
 parser.add_argument('--num_mrb', type=int, default=1)
 parser.add_argument('--num_channels', type=int, default=64)
 parser.add_argument('--optimize', type=bool, default=False)
+parser.add_argument('--quantize', type=str, default="default")
+
 
 args = parser.parse_args()
 
@@ -54,7 +56,14 @@ def main():
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
 
     if args.optimize:
-        converter.optimizations = [tf.lite.Optimize.DEFAULT]
+        
+        if args.quantize == 'default':
+            converter.optimizations = [tf.lite.Optimize.DEFAULT]
+        
+        elif args.quantize == 'fp16':
+            converter.optimizations = [tf.lite.Optimize.DEFAULT]
+            converter.target_spec.supported_types = [tf.float16]
+            
 
     tflite_model = converter.convert()
     with open(args.tflite_model_path, 'wb') as f:

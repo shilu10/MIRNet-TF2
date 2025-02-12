@@ -58,6 +58,7 @@ def test(model):
         t = time.time()
         enhanced_image = model.predict(inputs, verbose=False)
         enhanced_image = enhanced_image[0]
+        
         print("Time taken for inference: ", time.time() - t)
 
         if args.plot_results:
